@@ -5,6 +5,11 @@ import { AppService } from './app.service';
 export class AppController {
   constructor(private readonly appService: AppService) {}
 
+  @Get()
+  public async getRoot(): Promise<string> {
+    return 'Bienvenue sur l’API BookStore';
+  }
+
   @Get('greet/:name')
   public async greetMe(@Param('name') name: string): Promise<string> {
     return `Hello ${name}`;
