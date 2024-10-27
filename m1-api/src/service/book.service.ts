@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { Injectable } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
@@ -10,8 +11,16 @@ export class BookService {
     private bookRepository: Repository<Book>,
   ) {}
 
-  async createBook(title: string, publicationDate: string, author: string): Promise<Book> {
-    const newBook = this.bookRepository.create({ title, publicationDate, author });
+  async createBook(
+    title: string,
+    publicationDate: string,
+    author: string,
+  ): Promise<Book> {
+    const newBook = this.bookRepository.create({
+      title,
+      publicationDate,
+      author,
+    });
     return this.bookRepository.save(newBook);
   }
 

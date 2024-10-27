@@ -1,9 +1,11 @@
+/* eslint-disable prettier/prettier */
 import { Controller, Get, Post, Body } from '@nestjs/common';
 import { BookService } from '../service/book.service';
 import { Book } from '../models/book.entity';
 
 @Controller('books')
 export class BookController {
+  // eslint-disable-next-line prettier/prettier
   constructor(private readonly bookService: BookService) {}
 
   @Post()
