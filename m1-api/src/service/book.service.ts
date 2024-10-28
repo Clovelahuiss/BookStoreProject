@@ -4,6 +4,7 @@ import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Book } from '../models/book.entity';
 import { UpdateBookDto } from 'src/dto/update-book.dto';
+import { BookPresenter } from '../presenter/book.presenter';
 
 @Injectable()
 export class BookService {
@@ -14,22 +15,16 @@ export class BookService {
   }
   
 
-  async createBook(
-    title: string,
-    publicationDate: string,
-    author: string,
-  ): Promise<Book> {
-    const newBook = this.bookRepository.create({
-      title,
-      publicationDate,
-      author,
-    });
-    return this.bookRepository.save(newBook);
+  async createBook(title: string, publicationDate: string, author: string): Promise<BookPresenter> {
+    const newBook = this.bookRepository.create({ title, publicationDate, author });
+    const savedBook = await this.bookRepository.save(newBook);
+    return new BookPresenter(savedBook);
   }
 
   async findAllBooks(): Promise<Book[]> {
     console.log('findAllBooks called');
-    return this.bookRepository.find();
+    const books = await this.bookRepository.find();
+    return books.map(book => new BookPresenter(book));
   }
   async updateBook(id: string, updateBookDto: UpdateBookDto): Promise<Book> {
     await this.bookRepository.update(id, updateBookDto);
