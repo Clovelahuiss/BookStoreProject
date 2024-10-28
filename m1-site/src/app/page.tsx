@@ -1,6 +1,6 @@
 // src/App.js
 import React from 'react';
-import BooksList from 'C:/Users/simon/BookStoreProject/m1-site/src/BooksList.js';
+import BooksList from './components/BooksList.js';
 
 function App() {
     return (
