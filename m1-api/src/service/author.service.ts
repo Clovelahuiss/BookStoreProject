@@ -5,7 +5,6 @@ import { Repository } from 'typeorm';
 import { Author } from '../models/author.entity';
 import { CreateAuthorDto } from '../dto/create-author.dto';
 import { UpdateAuthorDto } from '../dto/update-author.dto';
-import { AuthorPresenter } from '../presenter/author.presenter';
 
 @Injectable()
 export class AuthorService {
@@ -14,29 +13,43 @@ export class AuthorService {
     private authorRepository: Repository<Author>,
   ) {}
 
-  async createAuthor(createAuthorDto: CreateAuthorDto): Promise<AuthorPresenter> {
+  async findAllAuthors(search?: string) {
+    const authorsQuery = this.authorRepository.createQueryBuilder('author')
+      .leftJoinAndSelect('author.books', 'book');
+
+    if (search) {
+      authorsQuery.where('author.name LIKE :search', { search: `%${search}%` });
+    }
+
+    const authors = await authorsQuery.getMany();
+
+    return authors.map(author => ({
+      id: author.id,
+      name: author.name,
+      photo: author.photo,
+      bookCount: author.books ? author.books.length : 0,
+    }));
+  }
+
+  async createAuthor(createAuthorDto: CreateAuthorDto): Promise<Author> {
     const newAuthor = this.authorRepository.create(createAuthorDto);
-    const savedAuthor = await this.authorRepository.save(newAuthor);
-    return new AuthorPresenter(savedAuthor); // Conversion en AuthorPresenter
+    return await this.authorRepository.save(newAuthor);
   }
 
-  async findAllAuthors(): Promise<AuthorPresenter[]> {
-    const authors = await this.authorRepository.find();
-    return authors.map(author => new AuthorPresenter(author));
-  }
-
-  async findAuthorById(id: number): Promise<AuthorPresenter> {
-    const author = await this.authorRepository.findOneBy({ id });
+  async findAuthorById(id: number): Promise<Author> {
+    const author = await this.authorRepository.findOne({
+      where: { id },
+      relations: ['books'],
+    });
     if (!author) {
       throw new NotFoundException(`Author with ID ${id} not found`);
     }
-    return new AuthorPresenter(author);
+    return author;
   }
 
-  async updateAuthor(id: number, updateAuthorDto: UpdateAuthorDto): Promise<AuthorPresenter> {
+  async updateAuthor(id: number, updateAuthorDto: UpdateAuthorDto): Promise<Author> {
     await this.authorRepository.update(id, updateAuthorDto);
-    const updatedAuthor = await this.findAuthorById(id);
-    return new AuthorPresenter(updatedAuthor);
+    return this.findAuthorById(id);
   }
 
   async deleteAuthor(id: number): Promise<void> {

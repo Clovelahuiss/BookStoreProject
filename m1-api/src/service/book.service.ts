@@ -1,9 +1,11 @@
 /* eslint-disable prettier/prettier */
-import { Injectable, NotFoundException} from '@nestjs/common';
+import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
 import { Repository } from 'typeorm';
 import { Book } from '../models/book.entity';
-import { UpdateBookDto } from 'src/dto/update-book.dto';
+import { Author } from '../models/author.entity';
+import { CreateBookDto } from '../dto/create-book.dto';
+import { UpdateBookDto } from '../dto/update-book.dto';
 import { BookPresenter } from '../presenter/book.presenter';
 
 @Injectable()
@@ -11,27 +13,32 @@ export class BookService {
   constructor(
     @InjectRepository(Book)
     private bookRepository: Repository<Book>,
-  ) {    console.log('BookRepository injected:', !!this.bookRepository);
-  }
-  
+    @InjectRepository(Author)
+    private authorRepository: Repository<Author>,
+  ) {}
 
-  async createBook(title: string, publicationDate: string, author: string, summary: string): Promise<BookPresenter> {
-    const newBook = this.bookRepository.create({ title, publicationDate, author, summary });
+  async createBook(createBookDto: CreateBookDto): Promise<BookPresenter> {
+    const { title, publicationDate, summary, authorId } = createBookDto;
+    const author = await this.authorRepository.findOneBy({ id: authorId });
+    if (!author) {
+      throw new NotFoundException(`Author with ID ${authorId} not found`);
+    }
+
+    const newBook = this.bookRepository.create({
+      title,
+      publicationDate,
+      summary,
+      author,
+    });
     const savedBook = await this.bookRepository.save(newBook);
     return new BookPresenter(savedBook);
   }
 
-  async findAllBooks(): Promise<Book[]> {
-    console.log('findAllBooks called');
+  async findAllBooks(): Promise<BookPresenter[]> {
     const books = await this.bookRepository.find();
-    return books.map(book => new BookPresenter(book));
+    return books.map((book) => new BookPresenter(book));
   }
-  async updateBook(id: string, updateBookDto: UpdateBookDto): Promise<BookPresenter> {
-    const numericId = Number(id); // Conversion de l'ID en nombre
-    await this.bookRepository.update(numericId, updateBookDto);
-    return this.bookRepository.findOneBy({ id: numericId });
-  }
-  
+
   async findOneBook(id: number): Promise<BookPresenter> {
     const book = await this.bookRepository.findOneBy({ id });
     if (!book) {
@@ -40,4 +47,26 @@ export class BookService {
     return new BookPresenter(book);
   }
 
+  async deleteBook(id: number): Promise<void> {
+    const deleteResult = await this.bookRepository.delete(id);
+    if (deleteResult.affected === 0) {
+      throw new NotFoundException(`Book with ID ${id} not found`);
+    }
+  }
+  
+
+  async updateBook(id: number, updateBookDto: UpdateBookDto): Promise<BookPresenter> {
+    const { authorId, ...rest } = updateBookDto;
+    let author: Author = null;
+    if (authorId) {
+      author = await this.authorRepository.findOneBy({ id: authorId });
+      if (!author) {
+        throw new NotFoundException(`Author with ID ${authorId} not found`);
+      }
+    }
+
+    await this.bookRepository.update(id, { ...rest, author });
+    const updatedBook = await this.bookRepository.findOneBy({ id });
+    return new BookPresenter(updatedBook);
+  }
 }

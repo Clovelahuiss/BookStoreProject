@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import { IsString, IsOptional } from 'class-validator';
+import { IsString, IsOptional, IsNumber } from 'class-validator';
 
 export class UpdateBookDto {
   @IsString()
@@ -12,9 +12,9 @@ export class UpdateBookDto {
 
   @IsString()
   @IsOptional()
-  author?: string;
+  summary?: string;
 
-  @IsString()
+  @IsNumber()
   @IsOptional()
-  summary?: string; 
+  authorId?: number; // ID de l'auteur (peut être mis à jour)
 }

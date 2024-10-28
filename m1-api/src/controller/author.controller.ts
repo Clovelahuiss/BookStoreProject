@@ -1,27 +1,25 @@
 /* eslint-disable prettier/prettier */
-import { Controller, Get, Post, Put, Delete, Param, Body } from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Query, Put, Delete } from '@nestjs/common';
 import { AuthorService } from '../service/author.service';
 import { CreateAuthorDto } from '../dto/create-author.dto';
 import { UpdateAuthorDto } from '../dto/update-author.dto';
-import { AuthorPresenter } from '../presenter/author.presenter';
-
 
 @Controller('authors')
 export class AuthorController {
   constructor(private readonly authorService: AuthorService) {}
 
+  @Get()
+  async findAllAuthors(@Query('search') search?: string) {
+    return this.authorService.findAllAuthors(search);
+  }
+
   @Post()
-  async createAuthor(@Body() createAuthorDto: CreateAuthorDto): Promise<AuthorPresenter> {
+  async createAuthor(@Body() createAuthorDto: CreateAuthorDto) {
     return this.authorService.createAuthor(createAuthorDto);
   }
 
-  @Get()
-  async findAllAuthors(): Promise<AuthorPresenter[]> {
-    return this.authorService.findAllAuthors();
-  }
-
   @Get(':id')
-  async findAuthorById(@Param('id') id: string): Promise<AuthorPresenter> {
+  async findAuthorById(@Param('id') id: string) {
     return this.authorService.findAuthorById(Number(id));
   }
 
@@ -29,12 +27,12 @@ export class AuthorController {
   async updateAuthor(
     @Param('id') id: string,
     @Body() updateAuthorDto: UpdateAuthorDto,
-  ): Promise<AuthorPresenter> {
+  ) {
     return this.authorService.updateAuthor(Number(id), updateAuthorDto);
   }
 
   @Delete(':id')
-  async deleteAuthor(@Param('id') id: string): Promise<void> {
+  async deleteAuthor(@Param('id') id: string) {
     return this.authorService.deleteAuthor(Number(id));
   }
 }

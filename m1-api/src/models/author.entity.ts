@@ -10,10 +10,12 @@ export class Author {
   @Column()
   name: string;
 
+  @Column({ nullable: true })
+  bio?: string;
 
   @Column({ nullable: true })
-  bio?: string; // Optionnel : Biographie de l'auteur
-  
-  @OneToMany(() => Book, (book) => book.author)
+  photo?: string; // Ajout du champ photo
+
+  @OneToMany(() => Book, (book) => book.author, { eager: true })
   books: Book[];
 }

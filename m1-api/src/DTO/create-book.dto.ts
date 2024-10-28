@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import { IsString, IsNotEmpty, IsOptional } from 'class-validator';
+import { IsString, IsNotEmpty, IsOptional, IsNumber } from 'class-validator';
 
 export class CreateBookDto {
   @IsString()
@@ -11,10 +11,10 @@ export class CreateBookDto {
   publicationDate: string;
 
   @IsString()
-  @IsNotEmpty()
-  author: string;
-
-  @IsString()
   @IsOptional()
-  summary?: string; 
+  summary?: string;
+
+  @IsNumber()
+  @IsNotEmpty()
+  authorId: number; // ID de l'auteur associé
 }

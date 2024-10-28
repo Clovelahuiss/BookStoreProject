@@ -1,4 +1,6 @@
-import { Entity, PrimaryGeneratedColumn, Column } from 'typeorm';
+/* eslint-disable prettier/prettier */
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
+import { Author } from './author.entity';
 
 @Entity()
 export class Book {
@@ -11,9 +13,9 @@ export class Book {
   @Column()
   publicationDate: string;
 
-  @Column()
-  author: string;
-
-  @Column({ nullable: true }) // Rendre le champ optionnel
+  @Column({ nullable: true })
   summary?: string;
+
+  @ManyToOne(() => Author, (author) => author.books, {  onDelete: 'SET NULL' })
+  author: Author;
 }
