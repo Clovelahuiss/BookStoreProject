@@ -2,9 +2,10 @@
 export interface Author {
     id: number;
     name: string;
-    photo?: string;
     bio?: string;
+    photo?: string;
     bookCount?: number;
     averageRating?: number;
-    books?: { id: number; title: string }[];
 }
+
+export type NewAuthor = Omit<Author, 'id'>;
