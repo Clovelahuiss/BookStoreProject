@@ -6,8 +6,12 @@ interface Book {
     id: number;
     title: string;
     publicationDate: string;
-    author: string;
+    author: {
+        id: number;
+        name: string;
+    };
 }
+
 
 const BooksList: React.FC = () => {
     const [books, setBooks] = useState<Book[]>([]);
@@ -43,7 +47,7 @@ const BooksList: React.FC = () => {
                 <ul>
                     {books.map((book) => (
                         <li key={book.id}>
-                            {book.title} (Publié en {book.publicationDate} par {book.author})
+                            {book.title} (Publié en {book.publicationDate} par {book.author.name})
                         </li>
                     ))}
                 </ul>
