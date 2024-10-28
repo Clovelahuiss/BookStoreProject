@@ -1,17 +1,18 @@
 /* eslint-disable prettier/prettier */
 import { Injectable, NotFoundException } from '@nestjs/common';
 import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
 import { Author } from '../models/author.entity';
 import { CreateAuthorDto } from '../dto/create-author.dto';
 import { UpdateAuthorDto } from '../dto/update-author.dto';
+import { AuthorRepository } from '../repository/author.repository';
 
 @Injectable()
 export class AuthorService {
   constructor(
-    @InjectRepository(Author)
-    private authorRepository: Repository<Author>,
-  ) {}
+    @InjectRepository(AuthorRepository)
+    private authorRepository: AuthorRepository,
+
+  ){}
 
   async findAllAuthors(search?: string) {
     const authorsQuery = this.authorRepository.createQueryBuilder('author')

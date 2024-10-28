@@ -1,24 +1,21 @@
 /* eslint-disable prettier/prettier */
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { InjectRepository } from '@nestjs/typeorm';
-import { Repository } from 'typeorm';
-import { Book } from '../models/book.entity';
 import { Author } from '../models/author.entity';
 import { CreateBookDto } from '../dto/create-book.dto';
 import { UpdateBookDto } from '../dto/update-book.dto';
 import { BookPresenter } from '../presenter/book.presenter';
 import { CreateReviewDto } from '../dto/create-review.dto';
 import { Review } from '../models/review.entity';
+import { BookRepository } from '../repository/book.repository';
+import { AuthorRepository } from '../repository/author.repository';
+import { ReviewRepository } from '../repository/review.repository';
 
 @Injectable()
 export class BookService {
   constructor(
-    @InjectRepository(Book)
-    private bookRepository: Repository<Book>,
-    @InjectRepository(Author)
-    private authorRepository: Repository<Author>,
-    @InjectRepository(Review)
-    private reviewRepository: Repository<Review>,
+    private readonly bookRepository: BookRepository,
+    private readonly authorRepository: AuthorRepository,
+    private readonly reviewRepository: ReviewRepository,
   ) {}
 
   async findAllBooks(title?: string, sortBy?: string, sortOrder: 'ASC' | 'DESC' = 'ASC'): Promise<BookPresenter[]> {
@@ -36,7 +33,6 @@ export class BookService {
     const books = await query.getMany();
     return books.map((book) => new BookPresenter(book));
   }
-
 
   async findOneBook(id: number): Promise<BookPresenter> {
     const book = await this.bookRepository.findOne({
@@ -99,6 +95,7 @@ export class BookService {
 
     return parseFloat(avg) || 0;
   }
+
   async updateBook(id: number, updateBookDto: UpdateBookDto): Promise<BookPresenter> {
     const { authorId, ...rest } = updateBookDto;
     let author: Author = null;

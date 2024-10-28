@@ -1,19 +1,20 @@
 /* eslint-disable prettier/prettier */
-import { Module } from '@nestjs/common';
+import { Module, forwardRef } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { Book } from '../models/book.entity';
-import { Author } from '../models/author.entity';
-import { Review } from '../models/review.entity'; // Importer Review
 import { BookService } from '../service/book.service';
 import { BookController } from '../controller/book.controller';
-import { AuthorModule } from './author.module';
+import { BookRepository } from '../repository/book.repository';
+import { ReviewModule } from './review.module'; // Importe ReviewModule
+import { AuthorModule } from './author.module'; // Importe AuthorModule
 
 @Module({
   imports: [
-    TypeOrmModule.forFeature([Book, Author, Review]), // Ajouter Review ici
-    AuthorModule,
-  ],
-  providers: [BookService],
+    TypeOrmModule.forFeature([Book]),
+    forwardRef(() => ReviewModule),
+     forwardRef(() => AuthorModule),  ],
+  providers: [BookService, BookRepository],
   controllers: [BookController],
+  exports: [BookRepository],
 })
 export class BookModule {}
