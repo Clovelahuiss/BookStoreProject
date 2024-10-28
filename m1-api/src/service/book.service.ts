@@ -25,6 +25,8 @@ export class BookService {
   }
 
   async findAllBooks(): Promise<Book[]> {
+    console.log('findAllBooks called');
     return this.bookRepository.find();
   }
+
 }

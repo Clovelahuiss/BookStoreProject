@@ -18,7 +18,8 @@ export class BookController {
   }
 
   @Get()
-  async findAllBooks(): Promise<Book[]> {
-    return this.bookService.findAllBooks();
-  }
+async findAllBooks(): Promise<Book[]> {
+  console.log('GET /books endpoint called');
+  return this.bookService.findAllBooks();
+}
 }
