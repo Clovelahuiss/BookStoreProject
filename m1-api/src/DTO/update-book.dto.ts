@@ -13,4 +13,8 @@ export class UpdateBookDto {
   @IsString()
   @IsOptional()
   author?: string;
+
+  @IsString()
+  @IsOptional()
+  summary?: string; 
 }

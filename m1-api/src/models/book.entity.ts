@@ -13,4 +13,7 @@ export class Book {
 
   @Column()
   author: string;
+
+  @Column({ nullable: true }) // Rendre le champ optionnel
+  summary?: string;
 }
