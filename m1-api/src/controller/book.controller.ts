@@ -1,27 +1,27 @@
 /* eslint-disable prettier/prettier */
-import { Controller, Get, Post, Put, Param, Body, Delete } from '@nestjs/common';
+import { Controller, Get, Post, Put, Param, Body, Delete, Query } from '@nestjs/common';
 import { BookService } from '../service/book.service';
 import { BookPresenter } from '../presenter/book.presenter';
 import { CreateBookDto } from '../dto/create-book.dto';
 import { UpdateBookDto } from '../dto/update-book.dto';
+import { CreateReviewDto } from '../dto/create-review.dto';
 
 @Controller('books')
 export class BookController {
   constructor(private readonly bookService: BookService) {}
 
-  @Delete(':id')
-  async deleteBook(@Param('id') id: string) {
-    return this.bookService.deleteBook(Number(id));
+  @Get()
+  async findAllBooks(
+    @Query('title') title?: string,
+    @Query('sortBy') sortBy?: string,
+    @Query('sortOrder') sortOrder: 'ASC' | 'DESC' = 'ASC'
+  ): Promise<BookPresenter[]> {
+    return this.bookService.findAllBooks(title, sortBy, sortOrder);
   }
-  
+
   @Post()
   async createBook(@Body() createBookDto: CreateBookDto): Promise<BookPresenter> {
     return this.bookService.createBook(createBookDto);
-  }
-
-  @Get()
-  async findAllBooks(): Promise<BookPresenter[]> {
-    return this.bookService.findAllBooks();
   }
 
   @Get(':id')
@@ -35,5 +35,15 @@ export class BookController {
     @Body() updateBookDto: UpdateBookDto,
   ): Promise<BookPresenter> {
     return this.bookService.updateBook(Number(id), updateBookDto);
+  }
+
+  @Delete(':id')
+  async deleteBook(@Param('id') id: string) {
+    return this.bookService.deleteBook(Number(id));
+  }
+
+  @Post(':id/reviews')
+  async addReview(@Param('id') id: string, @Body() createReviewDto: CreateReviewDto) {
+    return this.bookService.addReview(Number(id), createReviewDto);
   }
 }
