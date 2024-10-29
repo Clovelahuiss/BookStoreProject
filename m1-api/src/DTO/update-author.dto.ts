@@ -9,4 +9,8 @@ export class UpdateAuthorDto {
   @IsString()
   @IsOptional()
   bio?: string;
+
+  @IsString()
+  @IsOptional()
+  photo?: string; // Champ photo ajouté pour permettre la mise à jour de la photo
 }

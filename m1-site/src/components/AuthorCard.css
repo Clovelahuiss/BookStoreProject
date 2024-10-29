@@ -1,0 +1,30 @@
+.author-card {
+    padding: 16px;
+    border: 1px solid #ddd;
+    border-radius: 8px;
+    text-align: center;
+    background-color: #f9f9f9;
+    box-shadow: 0 4px 8px rgba(0, 0, 0, 0.1);
+    transition: transform 0.3s ease;
+}
+
+.author-card:hover {
+    transform: translateY(-4px);
+}
+
+.author-card img {
+    border-radius: 50%;
+    width: 80px;
+    height: 80px;
+    object-fit: cover;
+}
+
+.author-card h3 {
+    font-size: 1.25rem;
+    margin-top: 8px;
+}
+
+.author-card p {
+    color: #666;
+    font-size: 0.875rem;
+}

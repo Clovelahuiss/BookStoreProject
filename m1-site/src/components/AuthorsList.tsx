@@ -1,32 +1,37 @@
 "use client";
-
 import React from 'react';
-import styles from './AuthorsList.module.css';
-import { Author } from '../models/Author';
-
-interface AuthorsListProps {
-    authors: Author[];
+import './AuthorsList.module.css';
+interface Author {
+    id: number;
+    name: string;
+    bio?: string;
+    photo?: string;
+    bookCount: number;
+    averageRating?: number;
 }
 
-const AuthorsList: React.FC<AuthorsListProps> = ({ authors }) => {
+interface AuthorCardProps {
+    author: Author;
+    onDelete: (authorId: number) => void;
+    onEdit: (author: Author) => void;
+}
+
+const AuthorCard: React.FC<AuthorCardProps> = ({ author, onDelete, onEdit }) => {
     return (
-        <div className={styles.authorsContainer}>
-            {authors.map((author) => (
-                <div key={author.id} className={styles.authorCard}>
-                    <img
-                        src={author.photo || 'https://via.placeholder.com/100'}
-                        alt={author.name}
-                        className={styles.authorPhoto}
-                    />
-                    <div className={styles.authorName}>{author.name}</div>
-                    <div className={styles.authorDetails}>
-                        <p>Livres écrits : {author.bookCount || 0}</p>
-                        <p>Note moyenne : {author.averageRating || 'N/A'}</p>
-                    </div>
-                </div>
-            ))}
+        <div className="author-card">
+            <img src={author.photo || 'default-photo.png'} alt={author.name} className="author-photo" />
+            <h3>{author.name}</h3>
+            <p>{author.bio || 'Aucune biographie disponible.'}</p>
+            <p>Livres écrits : {author.bookCount}</p>
+            <p>Note moyenne : {author.averageRating || 'N/A'}</p>
+            
+            <div className="action-buttons">
+                <button onClick={() => onEdit(author)}>Modifier</button>
+                <button onClick={() => onDelete(author.id)}>Supprimer</button>
+            </div>
         </div>
     );
 };
 
-export default AuthorsList;
+export default AuthorCard;
+

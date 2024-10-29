@@ -1,62 +1,70 @@
-"use client";
-import React, { useState } from 'react';
-import './Modal.css'; 
-
+// src/components/AddAuthorModal.tsx
+import React from 'react';
+import { Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button } from '@mui/material';
 
 interface AddAuthorModalProps {
+    open: boolean;
     onClose: () => void;
-    onSave: (name: string, bio: string, photo: string) => void;
+    onAddAuthor: (author: { name: string; bio: string; photo: string }) => void;
 }
 
-const AddAuthorModal: React.FC<AddAuthorModalProps> = ({ onClose, onSave }) => {
-    const [name, setName] = useState("");
-    const [bio, setBio] = useState("");
-    const [photo, setPhoto] = useState("");
+const AddAuthorModal: React.FC<AddAuthorModalProps> = ({ open, onClose, onAddAuthor }) => {
+    const [newAuthor, setNewAuthor] = React.useState({ name: '', bio: '', photo: '' });
 
-    const handleSubmit = (e: React.FormEvent) => {
-        e.preventDefault();
-        onSave(name, bio, photo);
-        onClose();
+    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+        const { name, value } = e.target;
+        setNewAuthor((prev) => ({ ...prev, [name]: value }));
+    };
+
+    const handleAdd = () => {
+        onAddAuthor(newAuthor);
+        setNewAuthor({ name: '', bio: '', photo: '' });
     };
 
     return (
-        <div className="modal-overlay">
-            <div className="modal-content">
-                <h2>Ajouter un nouvel auteur</h2>
-                <form onSubmit={handleSubmit}>
-                    <div>
-                        <label>Nom :</label>
-                        <input 
-                            type="text" 
-                            value={name} 
-                            onChange={(e) => setName(e.target.value)} 
-                            required 
-                            placeholder="Entrez le nom de l'auteur"
-                        />
-                    </div>
-                    <div>
-                        <label>Biographie :</label>
-                        <textarea 
-                            placeholder="Entrez la biographie de l'auteur"
-                            value={bio} 
-                            onChange={(e) => setBio(e.target.value)} 
-                        />
-                    </div>
-                    <div>
-                        <label>Photo (URL) :</label>
-                        <input 
-                            type="text" 
-                            value={photo} 
-                            onChange={(e) => setPhoto(e.target.value)} 
-                            title="Photo URL"
-                            placeholder="Entrez l'URL de la photo"
-                        />
-                    </div>
-                    <button type="submit">Enregistrer</button>
-                    <button type="button" onClick={onClose}>Annuler</button>
-                </form>
-            </div>
-        </div>
+        <Dialog open={open} onClose={onClose}>
+            <DialogTitle>Ajouter un Auteur</DialogTitle>
+            <DialogContent>
+                <TextField
+                    autoFocus
+                    margin="dense"
+                    label="Nom"
+                    name="name"
+                    fullWidth
+                    variant="outlined"
+                    value={newAuthor.name}
+                    onChange={handleChange}
+                />
+                <TextField
+                    margin="dense"
+                    label="Biographie"
+                    name="bio"
+                    fullWidth
+                    variant="outlined"
+                    multiline
+                    rows={4}
+                    value={newAuthor.bio}
+                    onChange={handleChange}
+                />
+                <TextField
+                    margin="dense"
+                    label="URL de la photo"
+                    name="photo"
+                    fullWidth
+                    variant="outlined"
+                    value={newAuthor.photo}
+                    onChange={handleChange}
+                />
+            </DialogContent>
+            <DialogActions>
+                <Button onClick={onClose} color="error">
+                    Annuler
+                </Button>
+                <Button onClick={handleAdd} color="primary" variant="contained">
+                    Valider
+                </Button>
+            </DialogActions>
+        </Dialog>
     );
 };
 

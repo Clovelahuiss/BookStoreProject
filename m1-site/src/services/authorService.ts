@@ -15,7 +15,25 @@ export const getAuthorById = async (id: number): Promise<Author> => {
     return await response.json();
 };
 
+export const updateAuthor = async (id: number, updatedAuthor: Partial<Author>): Promise<Author> => {
+    const response = await fetch(`http://localhost:3001/authors/${id}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedAuthor),
+    });
 
+    if (!response.ok) {
+        throw new Error('Erreur lors de la mise à jour de l’auteur');
+    }
+
+    return await response.json();
+};
+
+export const deleteAuthor = async (authorId: number): Promise<void> => {
+    await axios.delete(`${BASE_URL}/${authorId}`);
+};
 // Fonction pour ajouter un nouvel auteur
 export const addAuthor = async (author: NewAuthor): Promise<Author> => {
     const response = await axios.post(BASE_URL, author);
