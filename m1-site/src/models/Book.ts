@@ -7,6 +7,7 @@ interface Book {
     averageRating: number | null;
 }
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 interface CreationWithBooks {
     id: number;
     nomCreation: string;
