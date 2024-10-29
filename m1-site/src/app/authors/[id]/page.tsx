@@ -1,7 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
-import { Box, Typography, Avatar, Grid, Card, CardContent, IconButton, TextField, Button, Dialog, DialogActions, DialogContent, DialogTitle } from '@mui/material';
+import { Box, Typography, Avatar, Grid, Card, CardContent, IconButton, TextField, Button, Dialog, DialogActions, DialogContent, DialogTitle, Select, MenuItem, FormControl, InputLabel, SelectChangeEvent } from '@mui/material';
 import { Edit, Check } from '@mui/icons-material';
 import { useParams } from 'next/navigation';
 import { Author } from '../../../models/Author';
@@ -41,6 +41,7 @@ const AuthorDetailPage: React.FC = () => {
     });
     const [isPhotoModalOpen, setIsPhotoModalOpen] = useState(false);
     const [photoUrl, setPhotoUrl] = useState('');
+    const [sortType, setSortType] = useState(''); // État pour le type de tri sélectionné
 
     useEffect(() => {
         const fetchAuthor = async () => {
@@ -91,6 +92,33 @@ const AuthorDetailPage: React.FC = () => {
             } catch (error) {
                 console.error("Erreur lors de la mise à jour de la photo :", error);
             }
+        }
+    };
+    const handleSortChange = (event: SelectChangeEvent<string>) => {
+        setSortType(event.target.value as string);
+    };
+
+    const getSortedBooks = () => {
+        if (!author || !author.creations[0]?.books) return [];
+
+        const books = [...author.creations[0].books];
+        switch (sortType) {
+            case 'priceAsc':
+                return books.sort((a, b) => (a.price || 0) - (b.price || 0));
+            case 'priceDesc':
+                return books.sort((a, b) => (b.price || 0) - (a.price || 0));
+            case 'alphaAsc':
+                return books.sort((a, b) => a.title.localeCompare(b.title));
+            case 'alphaDesc':
+                return books.sort((a, b) => b.title.localeCompare(a.title));
+            case 'dateAsc':
+                return books.sort((a, b) => new Date(a.publicationDate).getTime() - new Date(b.publicationDate).getTime());
+            case 'dateDesc':
+                return books.sort((a, b) => new Date(b.publicationDate).getTime() - new Date(a.publicationDate).getTime());
+            case 'ratingDesc':
+                return books.sort((a, b) => (b.averageRating || 0) - (a.averageRating || 0));
+            default:
+                return books;
         }
     };
 
@@ -193,12 +221,27 @@ const AuthorDetailPage: React.FC = () => {
                 </Box>
             </Box>
 
+            {/* Tri */}
+            <FormControl fullWidth variant="outlined" sx={{ mb: 4 }}>
+                <InputLabel>Tri</InputLabel>
+                <Select value={sortType} onChange={handleSortChange} label="Tri">
+                    <MenuItem value="">Aucun tri</MenuItem>
+                    <MenuItem value="priceAsc">Prix croissant</MenuItem>
+                    <MenuItem value="priceDesc">Prix décroissant</MenuItem>
+                    <MenuItem value="alphaAsc">Ordre alphabétique (A-Z)</MenuItem>
+                    <MenuItem value="alphaDesc">Ordre alphabétique (Z-A)</MenuItem>
+                    <MenuItem value="dateAsc">Date de parution croissante</MenuItem>
+                    <MenuItem value="dateDesc">Date de parution décroissante</MenuItem>
+                    <MenuItem value="ratingDesc">Mieux notés</MenuItem>
+                </Select>
+            </FormControl>
+
             <Typography variant="h5" gutterBottom sx={{ mt: 4, fontWeight: 'bold', color: '#3f51b5' }}>
                 Livres écrits par {author?.name} :
             </Typography>
             <Grid container spacing={3}>
-                {author?.creations[0]?.books && author.creations[0].books.length > 0 ? (
-                    author.creations[0].books.map((book) => (
+                {getSortedBooks().length > 0 ? (
+                    getSortedBooks().map((book) => (
                         <Grid item xs={12} sm={6} md={4} key={book.id}>
                             <Card variant="outlined" sx={{ transition: 'transform 0.2s', '&:hover': { transform: 'scale(1.05)' } }}>
                                 <CardContent>
@@ -255,3 +298,4 @@ const AuthorDetailPage: React.FC = () => {
 };
 
 export default AuthorDetailPage;
+
