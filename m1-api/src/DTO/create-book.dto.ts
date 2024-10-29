@@ -1,24 +1,25 @@
 /* eslint-disable prettier/prettier */
-import { IsString, IsNotEmpty, IsOptional, IsNumber, IsDecimal } from 'class-validator';
+// src/dto/create-book.dto.ts
+import { IsNotEmpty, IsOptional, IsDecimal, IsString } from 'class-validator';
 
 export class CreateBookDto {
-  @IsString()
   @IsNotEmpty()
+  @IsString()
   title: string;
 
-  @IsString()
   @IsNotEmpty()
+  @IsString()
   publicationDate: string;
 
-  @IsString()
   @IsOptional()
+  @IsString()
   summary?: string;
 
-  @IsNumber()
-  @IsNotEmpty()
-  authorId: number;
-
-  @IsDecimal()
   @IsOptional()
-  price?: number; // Prix du livre
+  @IsDecimal()
+  price?: number;
+
+  @IsNotEmpty()
+  creationId: number;
 }
+

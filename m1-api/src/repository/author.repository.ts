@@ -9,7 +9,8 @@ export class AuthorRepository extends Repository<Author> {
     super(Author, dataSource.createEntityManager());
   }
 
-  async findAuthorsWithBooks(): Promise<Author[]> {
-    return this.find({ relations: ['books'] });
+  async findAuthorsWithCreations(): Promise<Author[]> {
+    // On utilise 'creations' au lieu de 'books' et on récupère indirectement les livres via les créations
+    return this.find({ relations: ['creations'] });
   }
 }

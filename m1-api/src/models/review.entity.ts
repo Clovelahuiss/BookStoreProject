@@ -7,12 +7,12 @@ export class Review {
   @PrimaryGeneratedColumn()
   id: number;
 
-  @Column('int')
-  rating: number; // Note entre 1 et 5
+  @Column()
+  rating: number;
 
-  @Column({ nullable: true })
-  comment?: string;
+  @Column({ type: 'text' })
+  comment: string;
 
-  @ManyToOne(() => Book, (book) => book.reviews, { onDelete: 'CASCADE' }) // Relation avec Book
+  @ManyToOne(() => Book, (book) => book.reviews, { onDelete: 'CASCADE' })  // Relation avec Book
   book: Book;
 }

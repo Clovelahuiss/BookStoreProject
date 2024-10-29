@@ -20,7 +20,7 @@ export class BookController {
   }
 
   @Post()
-  async createBook(@Body() createBookDto: CreateBookDto): Promise<BookPresenter> {
+  createBook(@Body() createBookDto: CreateBookDto) {
     return this.bookService.createBook(createBookDto);
   }
 

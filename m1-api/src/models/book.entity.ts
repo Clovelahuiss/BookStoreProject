@@ -20,14 +20,9 @@ export class Book {
   @Column({ type: 'decimal', precision: 5, scale: 2, nullable: true })
   price?: number;
 
-  @Column({ type: 'decimal', precision: 5, scale: 2, nullable: true })
-  averageRating?: number;
-
-
-  @OneToMany(() => Review, (review) => review.book) 
-  reviews: Review[];
-
-
   @ManyToOne(() => Creation, (creation) => creation.books)
   creation: Creation;
+
+  @OneToMany(() => Review, (review) => review.book, { cascade: true })  // Ajout de la relation avec Review
+  reviews: Review[];
 }

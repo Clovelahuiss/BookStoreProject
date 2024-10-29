@@ -6,6 +6,8 @@ export interface Author {
     photo?: string;
     bookCount?: number;
     averageRating?: number;
+    creations?: CreationWithBooks[]; // Ajout de creations comme propriété optionnelle
 }
+
 
 export type NewAuthor = Omit<Author, 'id'>;

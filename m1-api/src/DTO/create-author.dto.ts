@@ -13,4 +13,8 @@ export class CreateAuthorDto {
   @IsString()
   @IsOptional()
   photo?: string;
+
+  @IsString()
+  nomCreation?: string; 
+
 }

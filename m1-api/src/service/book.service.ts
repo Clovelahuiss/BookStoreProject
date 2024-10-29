@@ -1,121 +1,74 @@
 /* eslint-disable prettier/prettier */
+// src/service/book.service.ts
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Author } from '../models/author.entity';
+import { Book } from '../models/book.entity';
+import { BookRepository } from '../repository/book.repository';
 import { CreateBookDto } from '../dto/create-book.dto';
 import { UpdateBookDto } from '../dto/update-book.dto';
-import { BookPresenter } from '../presenter/book.presenter';
 import { CreateReviewDto } from '../dto/create-review.dto';
-import { Review } from '../models/review.entity';
-import { BookRepository } from '../repository/book.repository';
-import { AuthorRepository } from '../repository/author.repository';
-import { ReviewRepository } from '../repository/review.repository';
 import { CreationRepository } from '../repository/creation.repository';
-import { Book } from 'src/models/book.entity';
+
 
 @Injectable()
 export class BookService {
   constructor(
     private readonly bookRepository: BookRepository,
-    private readonly authorRepository: AuthorRepository,
-    private readonly reviewRepository: ReviewRepository,
     private readonly creationRepository: CreationRepository,
+) {}
 
-  ) {}
 
-  async findAllBooks(title?: string, sortBy?: string, sortOrder: 'ASC' | 'DESC' = 'ASC'): Promise<BookPresenter[]> {
-    const query = this.bookRepository.createQueryBuilder('book')
-      .leftJoinAndSelect('book.author', 'author');
+async createBook(createBookDto: CreateBookDto): Promise<Book> {
+  const { title, publicationDate, summary, price, creationId } = createBookDto;
+
+  const creation = await this.creationRepository.findOne({ where: { id: creationId } });
+  if (!creation) {
+    throw new NotFoundException(`Creation with ID ${creationId} not found`);
+  }
+
+  const book = this.bookRepository.create({
+    title,
+    publicationDate,
+    summary,
+    price,
+    creation,
+  });
+
+  return await this.bookRepository.save(book);
+}
+
+
+
+  async findAllBooks(title?: string, sortBy?: string, sortOrder: 'ASC' | 'DESC' = 'ASC'): Promise<Book[]> {
+    const query = this.bookRepository.createQueryBuilder('book').leftJoinAndSelect('book.creation', 'creation');
 
     if (title) {
-      query.andWhere('book.title LIKE :title', { title: `%${title}%` });
+      query.where('book.title LIKE :title', { title: `%${title}%` });
     }
 
     if (sortBy) {
       query.orderBy(`book.${sortBy}`, sortOrder);
     }
 
-    const books = await query.getMany();
-    return books.map((book) => new BookPresenter(book));
+    return await query.getMany();
   }
 
-  async findOneBook(id: number): Promise<BookPresenter> {
-    const book = await this.bookRepository.findOne({
-      where: { id },
-      relations: ['author', 'reviews'], // Charger l'auteur et les avis
-    });
-    if (!book) {
-      throw new NotFoundException(`Book with ID ${id} not found`);
-    }
-    return new BookPresenter(book);
+  async findOneBook(id: number): Promise<Book> {
+    const book = await this.bookRepository.findOne({ where: { id }, relations: ['creation', 'reviews'] });
+    if (!book) throw new NotFoundException(`Book with ID ${id} not found`);
+    return book;
+  }
+
+  async updateBook(id: number, updateBookDto: UpdateBookDto): Promise<Book> {
+    await this.bookRepository.update(id, updateBookDto);
+    return this.findOneBook(id);
   }
 
   async deleteBook(id: number): Promise<void> {
-    const deleteResult = await this.bookRepository.delete(id);
-    if (deleteResult.affected === 0) {
-      throw new NotFoundException(`Book with ID ${id} not found`);
-    }
+    const book = await this.findOneBook(id);
+    await this.bookRepository.remove(book);
   }
 
-  async createBook(createBookDto: CreateBookDto): Promise<Book> {
-    const { title, publicationDate, summary, price, authorId } = createBookDto;
-    const author = await this.authorRepository.findOne({ where: { id: authorId }, relations: ['creation'] });
-    
-    if (!author) {
-      throw new NotFoundException(`Author with ID ${authorId} not found`);
-    }
+  async addReview(bookId: number, createReviewDto: CreateReviewDto): Promise<void> {
+   }
 
-    const book = this.bookRepository.create({
-      title,
-      publicationDate,
-      summary,
-      price,
-      creation: author.creation, 
-     });
-    
-
-    return await this.bookRepository.save(book);
-  }
-  async addReview(bookId: number, createReviewDto: CreateReviewDto): Promise<Review> {
-    const book = await this.bookRepository.findOneBy({ id: bookId });
-    if (!book) {
-      throw new NotFoundException(`Book with ID ${bookId} not found`);
-    }
-
-    const review = this.reviewRepository.create({ ...createReviewDto, book });
-    await this.reviewRepository.save(review);
-
-    // Mettre à jour la note moyenne du livre
-    const averageRating = await this.calculateAverageRating(bookId);
-    await this.bookRepository.update(bookId, { averageRating });
-
-    return review;
-  }
-
-  private async calculateAverageRating(bookId: number): Promise<number> {
-    const { avg } = await this.reviewRepository
-      .createQueryBuilder('review')
-      .select('AVG(review.rating)', 'avg')
-      .where('review.bookId = :bookId', { bookId })
-      .getRawOne();
-
-    return parseFloat(avg) || 0;
-  }
-
-  async updateBook(id: number, updateBookDto: UpdateBookDto): Promise<BookPresenter> {
-    const { authorId, ...rest } = updateBookDto;
-    let author: Author = null;
-    if (authorId) {
-      author = await this.authorRepository.findOneBy({ id: authorId });
-      if (!author) {
-        throw new NotFoundException(`Author with ID ${authorId} not found`);
-      }
-    }
-
-    await this.bookRepository.update(id, { ...rest, creation: author.creation });
-    const updatedBook = await this.bookRepository.findOne({
-      where: { id },
-      relations: ['author'],
-    });
-    return new BookPresenter(updatedBook);
-  }
 }

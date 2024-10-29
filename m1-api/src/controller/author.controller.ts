@@ -19,8 +19,8 @@ export class AuthorController {
   }
 
   @Get(':id')
-  async findAuthorById(@Param('id') id: string) {
-    return this.authorService.findAuthorById(Number(id));
+  async findAuthorById(@Param('id') id: number) {
+    return this.authorService.findAuthorById(id);
   }
 
   @Put(':id')
