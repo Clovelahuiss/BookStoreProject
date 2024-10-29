@@ -1,6 +1,7 @@
 'use client';
 
 import React, { useEffect, useState } from 'react';
+import Link from 'next/link';  // Importez le composant Link
 import { Box, Typography, Avatar, Grid, Card, CardContent, IconButton, TextField, Button, Dialog, DialogActions, DialogContent, DialogTitle, Select, MenuItem, FormControl, InputLabel, SelectChangeEvent } from '@mui/material';
 import { Edit, Check } from '@mui/icons-material';
 import { useParams } from 'next/navigation';
@@ -94,6 +95,7 @@ const AuthorDetailPage: React.FC = () => {
             }
         }
     };
+
     const handleSortChange = (event: SelectChangeEvent<string>) => {
         setSortType(event.target.value as string);
     };
@@ -243,25 +245,27 @@ const AuthorDetailPage: React.FC = () => {
                 {getSortedBooks().length > 0 ? (
                     getSortedBooks().map((book) => (
                         <Grid item xs={12} sm={6} md={4} key={book.id}>
-                            <Card variant="outlined" sx={{ transition: 'transform 0.2s', '&:hover': { transform: 'scale(1.05)' } }}>
-                                <CardContent>
-                                    <Typography variant="h6" color="primary" sx={{ fontWeight: 'bold' }}>
-                                        {book.title}
-                                    </Typography>
-                                    <Typography variant="body2" color="textSecondary">
-                                        Publié en {book.publicationDate}
-                                    </Typography>
-                                    <Typography variant="body2" sx={{ mt: 1 }}>
-                                        {book.summary}
-                                    </Typography>
-                                    <Typography variant="body2" color="textSecondary" sx={{ mt: 1 }}>
-                                        Prix : {book.price?.toFixed(2) || 'N/A'} €
-                                    </Typography>
-                                    <Typography variant="body2" color="textSecondary">
-                                        Note moyenne : {book.averageRating || 'N/A'}
-                                    </Typography>
-                                </CardContent>
-                            </Card>
+                            <Link href={`/books/${book.id}`} passHref> {/* Ajoutez le lien vers la page du livre */}
+                                <Card variant="outlined" sx={{ transition: 'transform 0.2s', '&:hover': { transform: 'scale(1.05)' }, cursor: 'pointer' }}>
+                                    <CardContent>
+                                        <Typography variant="h6" color="primary" sx={{ fontWeight: 'bold' }}>
+                                            {book.title}
+                                        </Typography>
+                                        <Typography variant="body2" color="textSecondary">
+                                            Publié en {book.publicationDate}
+                                        </Typography>
+                                        <Typography variant="body2" sx={{ mt: 1 }}>
+                                            {book.summary}
+                                        </Typography>
+                                        <Typography variant="body2" color="textSecondary" sx={{ mt: 1 }}>
+                                            Prix : {book.price?.toFixed(2) || 'N/A'} €
+                                        </Typography>
+                                        <Typography variant="body2" color="textSecondary">
+                                            Note moyenne : {book.averageRating || 'N/A'}
+                                        </Typography>
+                                    </CardContent>
+                                </Card>
+                            </Link>
                         </Grid>
                     ))
                 ) : (
@@ -298,4 +302,3 @@ const AuthorDetailPage: React.FC = () => {
 };
 
 export default AuthorDetailPage;
-
