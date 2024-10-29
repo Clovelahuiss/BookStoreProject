@@ -1,7 +1,7 @@
 /* eslint-disable prettier/prettier */
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
-import { Book } from './book.entity';
+import { Entity, PrimaryGeneratedColumn, Column, OneToMany, OneToOne } from 'typeorm';
 import { Author } from './author.entity';
+import { Book } from './book.entity';
 
 @Entity()
 export class Creation {
@@ -9,11 +9,11 @@ export class Creation {
   id: number;
 
   @Column()
-  nomAuteur: string; // Nom de l'auteur au moment de la création
+  nomAuteur: string;
 
-  @OneToMany(() => Book, (book) => book.creation, { cascade: true })
+  @OneToOne(() => Author, (author) => author.creation) // Un seul auteur par création
+  author: Author;
+
+  @OneToMany(() => Book, (book) => book.creation) // Plusieurs livres par création
   books: Book[];
-
-  @OneToMany(() => Author, (author) => author.creation, { cascade: true, onDelete: 'SET NULL' })
-  authors: Author[];
 }

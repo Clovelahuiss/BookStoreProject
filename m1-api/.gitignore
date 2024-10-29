@@ -1,8 +1,7 @@
 # compiled output
 /dist
 /node_modules
-# Ignore le fichier de base de données SQLite
-db
+
 
 
 # Logs

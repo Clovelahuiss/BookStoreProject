@@ -1,3 +1,4 @@
+/* eslint-disable prettier/prettier */
 import { Book } from '../models/book.entity';
 
 export class BookPresenter {
@@ -13,8 +14,9 @@ export class BookPresenter {
     this.publicationDate = book.publicationDate;
     this.summary = book.summary;
     // Vérifie si `author` est défini avant d'accéder à ses propriétés
-    this.author = book.author
-      ? { id: book.author.id, name: book.author.name }
-      : undefined;
+    this.author = book.creation?.author // Accéder à l’auteur via la relation `creation`
+    ? { id: book.creation.author.id, name: book.creation.author.name }
+    : null;
+
   }
 }

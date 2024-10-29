@@ -15,41 +15,34 @@ export class AuthorService {
 
     @InjectRepository(CreationRepository)
     private creationRepository: CreationRepository,
-
-  ){}
+  ) {}
 
   async findAllAuthors(search?: string) {
     const authorsQuery = this.authorRepository.createQueryBuilder('author')
-      .leftJoinAndSelect('author.books', 'book')
-      .leftJoinAndSelect('author.creation', 'creation'); // Jointure pour récupérer l'ID de création
-  
+      .leftJoinAndSelect('author.creation', 'creation') // Charger la création unique
+      .leftJoinAndSelect('creation.books', 'book'); // Charger les livres via la création
+
     if (search) {
       authorsQuery.where('author.name LIKE :search', { search: `%${search}%` });
     }
-  
+
     const authors = await authorsQuery.getMany();
-  
+
     return authors.map(author => ({
       id: author.id,
       name: author.name,
       photo: author.photo,
-      bio: author.bio,  // Ajout de la biographie
-      bookCount: author.books ? author.books.length : 0,
-      idCreation: author.creation ? author.creation.id : null, // Inclure l'ID de la création s'il existe
+      bio: author.bio,
+      bookCount: author.creation?.books ? author.creation.books.length : 0, // Utilisation de la création unique
+      idCreation: author.creation ? author.creation.id : null, // Utilisation de l'ID de la création unique
     }));
-  }
-  
-  
+}
+
 
   async createAuthor(createAuthorDto: CreateAuthorDto): Promise<Author> {
     const { name, bio, photo } = createAuthorDto;
     
-    let creation = await this.creationRepository.findOne({ where: { nomAuteur: name } });
-    
-    if (!creation) {
-      creation = this.creationRepository.create({ nomAuteur: name });
-      await this.creationRepository.save(creation);
-    }
+    const creation = await this.creationRepository.findOrCreate(name);
 
     const author = this.authorRepository.create({
       name,
@@ -64,7 +57,7 @@ export class AuthorService {
   async findAuthorById(id: number): Promise<Author> {
     const author = await this.authorRepository.findOne({
       where: { id },
-      relations: ['books'],
+      relations: ['creations', 'creations.books'], // Récupère les livres via les créations
     });
     if (!author) {
       throw new NotFoundException(`Author with ID ${id} not found`);
@@ -77,7 +70,7 @@ export class AuthorService {
     return this.findAuthorById(id);
   }
 
-   async deleteAuthor(authorId: number): Promise<void> {
+  async deleteAuthor(authorId: number): Promise<void> {
     const author = await this.authorRepository.findOne({ where: { id: authorId } });
     if (author) {
       await this.authorRepository.remove(author);

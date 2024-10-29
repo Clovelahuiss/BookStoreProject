@@ -69,9 +69,9 @@ export class BookService {
       publicationDate,
       summary,
       price,
-      creation: author.creation,
-      author,
-    });
+      creation: author.creation, 
+     });
+    
 
     return await this.bookRepository.save(book);
   }
@@ -111,7 +111,7 @@ export class BookService {
       }
     }
 
-    await this.bookRepository.update(id, { ...rest, author });
+    await this.bookRepository.update(id, { ...rest, creation: author.creation });
     const updatedBook = await this.bookRepository.findOne({
       where: { id },
       relations: ['author'],
