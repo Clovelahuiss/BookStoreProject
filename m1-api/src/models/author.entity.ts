@@ -1,5 +1,7 @@
 /* eslint-disable prettier/prettier */
-import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
+// src/models/author.entity.ts
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany } from 'typeorm';
+import { Creation } from './creation.entity';
 import { Book } from './book.entity';
 
 @Entity()
@@ -14,8 +16,11 @@ export class Author {
   bio?: string;
 
   @Column({ nullable: true })
-  photo?: string; // Ajout du champ photo
+  photo?: string;
 
-  @OneToMany(() => Book, (book) => book.author, { eager: true })
+  @ManyToOne(() => Creation, (creation) => creation.authors, { onDelete: 'SET NULL' })
+  creation: Creation;
+
+  @OneToMany(() => Book, (book) => book.author)
   books: Book[];
 }

@@ -5,12 +5,16 @@ import { Author } from '../models/author.entity';
 import { CreateAuthorDto } from '../dto/create-author.dto';
 import { UpdateAuthorDto } from '../dto/update-author.dto';
 import { AuthorRepository } from '../repository/author.repository';
+import { CreationRepository } from '../repository/creation.repository';
 
 @Injectable()
 export class AuthorService {
   constructor(
     @InjectRepository(AuthorRepository)
     private authorRepository: AuthorRepository,
+
+    @InjectRepository(CreationRepository)
+    private creationRepository: CreationRepository,
 
   ){}
 
@@ -33,8 +37,23 @@ export class AuthorService {
   }
 
   async createAuthor(createAuthorDto: CreateAuthorDto): Promise<Author> {
-    const newAuthor = this.authorRepository.create(createAuthorDto);
-    return await this.authorRepository.save(newAuthor);
+    const { name, bio, photo } = createAuthorDto;
+    
+    let creation = await this.creationRepository.findOne({ where: { nomAuteur: name } });
+    
+    if (!creation) {
+      creation = this.creationRepository.create({ nomAuteur: name });
+      await this.creationRepository.save(creation);
+    }
+
+    const author = this.authorRepository.create({
+      name,
+      bio,
+      photo,
+      creation,
+    });
+
+    return await this.authorRepository.save(author);
   }
 
   async findAuthorById(id: number): Promise<Author> {
@@ -53,10 +72,10 @@ export class AuthorService {
     return this.findAuthorById(id);
   }
 
-  async deleteAuthor(id: number): Promise<void> {
-    const deleteResult = await this.authorRepository.delete(id);
-    if (deleteResult.affected === 0) {
-      throw new NotFoundException(`Author with ID ${id} not found`);
+   async deleteAuthor(authorId: number): Promise<void> {
+    const author = await this.authorRepository.findOne({ where: { id: authorId } });
+    if (author) {
+      await this.authorRepository.remove(author);
     }
   }
 }

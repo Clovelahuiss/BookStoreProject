@@ -9,6 +9,8 @@ import { Review } from '../models/review.entity';
 import { BookRepository } from '../repository/book.repository';
 import { AuthorRepository } from '../repository/author.repository';
 import { ReviewRepository } from '../repository/review.repository';
+import { CreationRepository } from '../repository/creation.repository';
+import { Book } from 'src/models/book.entity';
 
 @Injectable()
 export class BookService {
@@ -16,6 +18,8 @@ export class BookService {
     private readonly bookRepository: BookRepository,
     private readonly authorRepository: AuthorRepository,
     private readonly reviewRepository: ReviewRepository,
+    private readonly creationRepository: CreationRepository,
+
   ) {}
 
   async findAllBooks(title?: string, sortBy?: string, sortOrder: 'ASC' | 'DESC' = 'ASC'): Promise<BookPresenter[]> {
@@ -52,24 +56,25 @@ export class BookService {
     }
   }
 
-  async createBook(createBookDto: CreateBookDto): Promise<BookPresenter> {
-    const { title, publicationDate, summary, authorId, price } = createBookDto;
-    const author = await this.authorRepository.findOneBy({ id: authorId });
+  async createBook(createBookDto: CreateBookDto): Promise<Book> {
+    const { title, publicationDate, summary, price, authorId } = createBookDto;
+    const author = await this.authorRepository.findOne({ where: { id: authorId }, relations: ['creation'] });
+    
     if (!author) {
       throw new NotFoundException(`Author with ID ${authorId} not found`);
     }
 
-    const newBook = this.bookRepository.create({
+    const book = this.bookRepository.create({
       title,
       publicationDate,
       summary,
       price,
+      creation: author.creation,
       author,
     });
-    const savedBook = await this.bookRepository.save(newBook);
-    return new BookPresenter(savedBook);
-  }
 
+    return await this.bookRepository.save(book);
+  }
   async addReview(bookId: number, createReviewDto: CreateReviewDto): Promise<Review> {
     const book = await this.bookRepository.findOneBy({ id: bookId });
     if (!book) {

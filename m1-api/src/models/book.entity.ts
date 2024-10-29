@@ -1,7 +1,10 @@
 /* eslint-disable prettier/prettier */
+// src/models/book.entity.ts
 import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany } from 'typeorm';
+import { Creation } from './creation.entity';
 import { Author } from './author.entity';
 import { Review } from './review.entity';
+
 
 @Entity()
 export class Book {
@@ -17,11 +20,14 @@ export class Book {
   @Column({ nullable: true })
   summary?: string;
 
-  @Column('decimal', { precision: 5, scale: 2, nullable: true }) // Prix du livre
+  averageRating?: number;
+
+
+  @Column({ type: 'decimal', precision: 5, scale: 2, nullable: true })
   price?: number;
 
-  @Column('float', { nullable: true }) // Note moyenne calculée
-  averageRating?: number;
+  @ManyToOne(() => Creation, (creation) => creation.books)
+  creation: Creation;
 
   @ManyToOne(() => Author, (author) => author.books, { onDelete: 'SET NULL' })
   author: Author;
