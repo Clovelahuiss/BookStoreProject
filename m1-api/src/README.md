@@ -60,3 +60,13 @@ Voici un résumé des étapes et des composants impliqués :
 +----------------+                               | summary        |
                                                  | creationId (FK)|
                                                  +----------------+
+```
+## Fonctionnalités Futures
+
+1. **Ajout de l'Entité Genre ou Éditeur** : Le modèle est facilement extensible pour ajouter d'autres entités liées à `creation`.
+2. **Interface Utilisateur Avancée** : En front, intégrer des options de filtrage basées sur `creation` pour les cas où un utilisateur souhaite afficher tous les livres d'un auteur même si celui-ci a été recréé.
+
+## Conclusion
+
+Le système basé sur l'entité `creation` offre une flexibilité et une robustesse essentielles pour la gestion de données interconnectées. En conservant l'identité unique d'un auteur au travers des suppressions et recréations, ce modèle garantit l'intégrité des relations et facilite la gestion des données de manière évolutive.
+
