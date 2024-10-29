@@ -11,8 +11,8 @@ export const getAuthors = async (search?: string): Promise<Author[]> => {
 };
 
 export const getAuthorById = async (id: number): Promise<Author> => {
-    const response = await fetch(`${BASE_URL}/${id}`);
-    return await response.json();
+    const response = await axios.get<Author>(`http://localhost:3001/authors/${id}`);
+    return response.data;
 };
 
 export const updateAuthor = async (id: number, updatedAuthor: Partial<Author>): Promise<Author> => {

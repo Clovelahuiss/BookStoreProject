@@ -1,9 +1,10 @@
+// src/pages/AuthorsPage.tsx
 'use client';
 import React, { useState, useEffect } from 'react';
 import AddAuthorModal from '../components/AddAuthorModal';
 import EditAuthorModal from '../components/EditAuthorModal';
 import DeleteAuthorModal from '../components/DeleteAuthorModal';
-import { Button, Typography, Box, Grid } from '@mui/material'; // Utilisation de Grid standard
+import { Button, Typography, Box, Grid, TextField } from '@mui/material';
 import AuthorCard from '../components/AuthorCard';
 import { Author } from '../models/Author';
 import { getAuthors, addAuthor, updateAuthor, deleteAuthor } from '../services/authorService';
@@ -15,6 +16,7 @@ const AuthorsPage: React.FC = () => {
     const [openDeleteModal, setOpenDeleteModal] = useState(false);
     const [editMode, setEditMode] = useState(false);
     const [selectedAuthor, setSelectedAuthor] = useState<Author | null>(null);
+    const [searchTerm, setSearchTerm] = useState(''); // Ajout du champ de recherche
 
     const fetchAuthors = async () => {
         try {
@@ -28,6 +30,10 @@ const AuthorsPage: React.FC = () => {
     useEffect(() => {
         fetchAuthors();
     }, []);
+
+    const filteredAuthors = authors.filter(author => 
+        author.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
     const handleOpenAddModal = () => setOpenAddModal(true);
     const handleCloseAddModal = () => setOpenAddModal(false);
@@ -104,6 +110,13 @@ const AuthorsPage: React.FC = () => {
                 <Button variant="outlined" color="secondary" onClick={toggleEditMode}>
                     {editMode ? "Terminer" : "Modifier"}
                 </Button>
+                <TextField
+                    label="Rechercher un auteur"
+                    variant="outlined"
+                    value={searchTerm}
+                    onChange={(e) => setSearchTerm(e.target.value)}
+                    fullWidth
+                />
             </Box>
             <AddAuthorModal open={openAddModal} onClose={handleCloseAddModal} onAddAuthor={handleAddAuthor} />
             {selectedAuthor && (
@@ -122,21 +135,19 @@ const AuthorsPage: React.FC = () => {
                     authorName={selectedAuthor.name}
                 />
             )}
-
-<Grid container spacing={3} mt={2}>
-    {Array.isArray(authors) && authors.map((author) => (
-        <Grid item xs={12} sm={6} md={4} key={author.id}>
-            <AuthorCard
-                author={author}
-                editMode={editMode}
-                onEdit={() => handleEdit(author.id)}
-                onDelete={() => handleDelete(author.id)}
-            />
-        </Grid>
-    ))}
-</Grid>
-</Box>
-
+            <Grid container spacing={3} mt={2}>
+                {filteredAuthors.map((author) => (
+                    <Grid item xs={12} sm={6} md={4} key={author.id}>
+                        <AuthorCard
+                            author={author}
+                            editMode={editMode}
+                            onEdit={() => handleEdit(author.id)}
+                            onDelete={() => handleDelete(author.id)}
+                        />
+                    </Grid>
+                ))}
+            </Grid>
+        </Box>
     );
 };
 

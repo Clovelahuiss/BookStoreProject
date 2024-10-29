@@ -20,21 +20,26 @@ export class AuthorService {
 
   async findAllAuthors(search?: string) {
     const authorsQuery = this.authorRepository.createQueryBuilder('author')
-      .leftJoinAndSelect('author.books', 'book');
-
+      .leftJoinAndSelect('author.books', 'book')
+      .leftJoinAndSelect('author.creation', 'creation'); // Jointure pour récupérer l'ID de création
+  
     if (search) {
       authorsQuery.where('author.name LIKE :search', { search: `%${search}%` });
     }
-
+  
     const authors = await authorsQuery.getMany();
-
+  
     return authors.map(author => ({
       id: author.id,
       name: author.name,
       photo: author.photo,
+      bio: author.bio,  // Ajout de la biographie
       bookCount: author.books ? author.books.length : 0,
+      idCreation: author.creation ? author.creation.id : null, // Inclure l'ID de la création s'il existe
     }));
   }
+  
+  
 
   async createAuthor(createAuthorDto: CreateAuthorDto): Promise<Author> {
     const { name, bio, photo } = createAuthorDto;
