@@ -6,9 +6,11 @@ import { CreationRepository } from '../repository/creation.repository';
 import { CreationController } from '../controller/creation.controller';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Creation])],
+  imports: [
+    TypeOrmModule.forFeature([Creation]), 
+],
   providers: [CreationRepository],
   controllers: [CreationController],
-  exports: [CreationRepository], // Exporte CreationRepository pour qu'il soit accessible dans d'autres modules
+  exports: [CreationRepository, TypeOrmModule],
 })
 export class CreationModule {}

@@ -1,71 +1,91 @@
-// src/components/AddAuthorModal.tsx
-import React from 'react';
-import { Dialog, DialogTitle, DialogContent, DialogActions, TextField, Button } from '@mui/material';
+import React, { useState, useEffect } from 'react';
+import { Box, Button, Modal, TextField, Typography, MenuItem, Select, FormControl, InputLabel } from '@mui/material';
+import { getCreations, postCreation } from '../services/creationService';
 
 interface AddAuthorModalProps {
-    open: boolean;
-    onClose: () => void;
-    onAddAuthor: (author: { name: string; bio: string; photo: string }) => void;
+  open: boolean;
+  onClose: () => void;
+  onAddAuthor: (authorData: { name: string; bio: string; photo: string; famille: string }) => void;
 }
 
 const AddAuthorModal: React.FC<AddAuthorModalProps> = ({ open, onClose, onAddAuthor }) => {
-    const [newAuthor, setNewAuthor] = React.useState({ name: '', bio: '', photo: '' });
+  const [name, setName] = useState('');
+  const [bio, setBio] = useState('');
+  const [photo, setPhoto] = useState('');
+  const [famille, setFamille] = useState('');
+  const [creations, setCreations] = useState<{ id: number; nomAuteur: string }[]>([]);
+  const [newFamille, setNewFamille] = useState(''); // Champ pour une nouvelle création
 
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target;
-        setNewAuthor((prev) => ({ ...prev, [name]: value }));
+  useEffect(() => {
+    const fetchCreations = async () => {
+      try {
+        const fetchedCreations = await getCreations();
+        setCreations(fetchedCreations);
+      } catch (error) {
+        console.error("Erreur lors de la récupération des créations :", error);
+      }
     };
+    fetchCreations();
+  }, []);
 
-    const handleAdd = () => {
-        onAddAuthor(newAuthor);
-        setNewAuthor({ name: '', bio: '', photo: '' });
-    };
+  const handleSubmit = async () => {
+    let selectedFamille = famille;
 
-    return (
-        <Dialog open={open} onClose={onClose}>
-            <DialogTitle>Ajouter un Auteur</DialogTitle>
-            <DialogContent>
-                <TextField
-                    autoFocus
-                    margin="dense"
-                    label="Nom"
-                    name="name"
-                    fullWidth
-                    variant="outlined"
-                    value={newAuthor.name}
-                    onChange={handleChange}
-                />
-                <TextField
-                    margin="dense"
-                    label="Biographie"
-                    name="bio"
-                    fullWidth
-                    variant="outlined"
-                    multiline
-                    rows={4}
-                    value={newAuthor.bio}
-                    onChange={handleChange}
-                />
-                <TextField
-                    margin="dense"
-                    label="URL de la photo"
-                    name="photo"
-                    fullWidth
-                    variant="outlined"
-                    value={newAuthor.photo}
-                    onChange={handleChange}
-                />
-            </DialogContent>
-            <DialogActions>
-                <Button onClick={onClose} color="error">
-                    Annuler
-                </Button>
-                <Button onClick={handleAdd} color="primary" variant="contained">
-                    Valider
-                </Button>
-            </DialogActions>
-        </Dialog>
-    );
+    if (famille === 'new' && newFamille) {
+      // Si "Nouvelle famille" est sélectionné, crée une nouvelle création
+      try {
+        const newCreation = await postCreation(newFamille);
+        selectedFamille = newCreation.nomAuteur; // Met à jour la famille avec la nouvelle création
+      } catch (error) {
+        console.error("Erreur lors de la création de la nouvelle famille :", error);
+        return;
+      }
+    }
+
+    onAddAuthor({ name, bio, photo, famille: selectedFamille });
+    onClose();
+    setName('');
+    setBio('');
+    setPhoto('');
+    setFamille('');
+    setNewFamille('');
+  };
+
+  return (
+    <Modal open={open} onClose={onClose}>
+      <Box sx={{ p: 4, bgcolor: 'background.paper', borderRadius: 2, width: 400, mx: 'auto', mt: '20vh' }}>
+        <Typography variant="h6" gutterBottom>Ajouter un Auteur</Typography>
+        
+        <TextField label="Nom" fullWidth margin="normal" value={name} onChange={(e) => setName(e.target.value)} />
+        <TextField label="Biographie" fullWidth margin="normal" value={bio} onChange={(e) => setBio(e.target.value)} />
+        <TextField label="URL de la photo" fullWidth margin="normal" value={photo} onChange={(e) => setPhoto(e.target.value)} />
+        
+        <FormControl fullWidth margin="normal">
+          <InputLabel>Famille</InputLabel>
+          <Select value={famille} onChange={(e) => setFamille(e.target.value)}>
+            {creations.map((creation) => (
+              <MenuItem key={creation.id} value={creation.nomAuteur}>{creation.nomAuteur}</MenuItem>
+            ))}
+            <MenuItem value="new">Nouvelle famille</MenuItem>
+          </Select>
+        </FormControl>
+        
+        {famille === 'new' && (
+          <TextField
+            label="Nom de la nouvelle famille"
+            fullWidth
+            margin="normal"
+            value={newFamille}
+            onChange={(e) => setNewFamille(e.target.value)}
+          />
+        )}
+        
+        <Button variant="contained" color="primary" fullWidth onClick={handleSubmit} sx={{ mt: 2 }}>
+          Valider
+        </Button>
+      </Box>
+    </Modal>
+  );
 };
 
 export default AddAuthorModal;

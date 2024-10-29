@@ -123,19 +123,20 @@ const AuthorsPage: React.FC = () => {
                 />
             )}
 
-            <Grid container spacing={3} mt={2}>
-                {authors.map((author) => (
-                    <Grid item xs={12} sm={6} md={4} key={author.id}>
-                        <AuthorCard
-                            author={author}
-                            editMode={editMode}
-                            onEdit={() => handleEdit(author.id)}
-                            onDelete={() => handleDelete(author.id)}
-                        />
-                    </Grid>
-                ))}
-            </Grid>
-        </Box>
+<Grid container spacing={3} mt={2}>
+    {Array.isArray(authors) && authors.map((author) => (
+        <Grid item xs={12} sm={6} md={4} key={author.id}>
+            <AuthorCard
+                author={author}
+                editMode={editMode}
+                onEdit={() => handleEdit(author.id)}
+                onDelete={() => handleDelete(author.id)}
+            />
+        </Grid>
+    ))}
+</Grid>
+</Box>
+
     );
 };
 

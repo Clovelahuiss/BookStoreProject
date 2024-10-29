@@ -6,7 +6,7 @@ import { TypeOrmModule } from '@nestjs/typeorm';
     TypeOrmModule.forRoot({
       type: 'sqlite',
       database: 'db',
-      entities: [__dirname + '/../**/*.entity{.ts,.js}'], // Remonte pour inclure tous les dossiers parents sinon probleme de chemin d'acces
+      entities: [__dirname + '/../**/*.entity{.ts,.js}'], // Assure-toi que ce chemin couvre bien toutes les entités
       synchronize: true,
     }),
   ],

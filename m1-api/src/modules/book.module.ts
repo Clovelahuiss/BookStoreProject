@@ -13,9 +13,8 @@ import { CreationModule } from './creation.module';
   imports: [
     TypeOrmModule.forFeature([Book]),
     forwardRef(() => ReviewModule),
-     forwardRef(() => AuthorModule),
-     CreationModule,
-      ],
+    forwardRef(() => AuthorModule),
+    CreationModule,   ],
   providers: [BookService, BookRepository],
   controllers: [BookController],
   exports: [BookRepository],
