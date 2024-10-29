@@ -12,13 +12,25 @@ interface AuthorCardProps {
 
 const AuthorCard: React.FC<AuthorCardProps> = ({ author, editMode, onEdit, onDelete }) => {
     return (
-        <Link href={`/authors/${author.id}`} passHref>
-            <Card variant="outlined" sx={{ maxWidth: 300, cursor: 'pointer', textDecoration: 'none', color: 'inherit' }}>
+        <Link href={`/authors/${author.id}`} passHref style={{ textDecoration: 'none', color: 'inherit' }}>
+            <Card
+                variant="outlined"
+                sx={{
+                    maxWidth: 300,
+                    cursor: 'pointer',
+                    transition: 'transform 0.2s ease-in-out',
+                    '&:hover': {
+                        transform: 'scale(1.05)',
+                        boxShadow: 3,
+                    },
+                    textDecoration: 'none',
+                }}
+            >
                 <CardContent>
                     <Box display="flex" justifyContent="center" mb={2}>
                         <Avatar src={author.photo || ''} sx={{ width: 100, height: 100 }} />
                     </Box>
-                    <Typography variant="h6" component="div" align="center">
+                    <Typography variant="h6" component="div" align="center" color="textPrimary">
                         {author.name}
                     </Typography>
                     <Typography variant="body2" color="text.secondary" align="center">
@@ -30,10 +42,20 @@ const AuthorCard: React.FC<AuthorCardProps> = ({ author, editMode, onEdit, onDel
                 </CardContent>
                 {editMode && (
                     <CardActions>
-                        <Button variant="outlined" color="primary" onClick={(e) => { e.preventDefault(); onEdit(); }} fullWidth>
+                        <Button
+                            variant="outlined"
+                            color="primary"
+                            onClick={(e) => { e.preventDefault(); onEdit(); }}
+                            fullWidth
+                        >
                             Modifier
                         </Button>
-                        <Button variant="outlined" color="error" onClick={(e) => { e.preventDefault(); onDelete(); }} fullWidth>
+                        <Button
+                            variant="outlined"
+                            color="error"
+                            onClick={(e) => { e.preventDefault(); onDelete(); }}
+                            fullWidth
+                        >
                             Supprimer
                         </Button>
                     </CardActions>

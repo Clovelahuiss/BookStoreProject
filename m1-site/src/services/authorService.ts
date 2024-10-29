@@ -11,7 +11,7 @@ export const getAuthors = async (search?: string): Promise<Author[]> => {
 };
 
 export const getAuthorById = async (id: number): Promise<Author> => {
-    const response = await axios.get<Author>(`http://localhost:3001/authors/${id}`);
+    const response = await axios.get<Author>(`${BASE_URL}/${id}`);
     return response.data;
 };
 
