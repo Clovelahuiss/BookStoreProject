@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
 import { ReviewService } from '../service/review.service';
@@ -8,9 +7,9 @@ import { Book } from '../models/book.entity';
 import { BookRepository } from '../repository/book.repository';
 
 @Module({
-  imports: [TypeOrmModule.forFeature([Review, Book])], // Ajoutez Book ici
+  imports: [TypeOrmModule.forFeature([Review, Book])],
   controllers: [ReviewController],
-  providers: [ReviewService, BookRepository], // Ajoutez BookRepository comme provider
+  providers: [ReviewService, BookRepository],
   exports: [ReviewService],
 })
 export class ReviewModule {}

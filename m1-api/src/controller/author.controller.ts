@@ -1,6 +1,14 @@
-/* eslint-disable prettier/prettier */
 /*Impossible de fixer la règle prettier/prettier pour le retour à la ligne*/
-import { Controller, Get, Post, Body, Param, Query, Put, Delete } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Body,
+  Param,
+  Query,
+  Put,
+  Delete,
+} from '@nestjs/common';
 import { AuthorService } from '../service/author.service';
 import { CreateAuthorDto } from '../dto/create-author.dto';
 import { UpdateAuthorDto } from '../dto/update-author.dto';
@@ -14,6 +22,13 @@ export class AuthorController {
     return this.authorService.findAllAuthors(search);
   }
 
+  @Get()
+  async findAll(
+    @Query('limit') limit: number = 10, // Limite d'auteurs par page, valeur par défaut 10
+    @Query('offset') offset: number = 0, // Nombre d'auteurs à sauter
+  ) {
+    return await this.authorService.findAllWithPagination(limit, offset);
+  }
   @Post()
   async createAuthor(@Body() createAuthorDto: CreateAuthorDto) {
     return this.authorService.createAuthor(createAuthorDto);

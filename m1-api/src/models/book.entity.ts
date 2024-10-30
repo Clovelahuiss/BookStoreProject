@@ -1,5 +1,10 @@
-/* eslint-disable prettier/prettier */
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  OneToMany,
+} from 'typeorm';
 import { Creation } from './creation.entity';
 import { Review } from './review.entity';
 
@@ -26,6 +31,6 @@ export class Book {
   @ManyToOne(() => Creation, (creation) => creation.books)
   creation: Creation;
 
-  @OneToMany(() => Review, (review) => review.book, { cascade: true })  
+  @OneToMany(() => Review, (review) => review.book, { cascade: true })
   reviews: Review[];
 }

@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 import { Entity, PrimaryGeneratedColumn, Column, OneToMany } from 'typeorm';
 import { Creation } from './creation.entity';
 
@@ -19,4 +18,3 @@ export class Author {
   @OneToMany(() => Creation, (creation) => creation.author)
   creations: Creation[];
 }
-

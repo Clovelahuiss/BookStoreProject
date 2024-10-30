@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 import { Injectable } from '@nestjs/common';
 import { Repository, DataSource } from 'typeorm';
 import { Review } from '../models/review.entity';

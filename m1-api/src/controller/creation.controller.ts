@@ -1,5 +1,3 @@
-/* eslint-disable prettier/prettier */
-//impossible de convertir en caractere unix
 import { Controller, Get, Post, Body } from '@nestjs/common';
 import { CreationRepository } from '../repository/creation.repository';
 import { Creation } from '../models/creation.entity';
@@ -14,7 +12,9 @@ export class CreationController {
   }
 
   @Post()
-  async createCreation(@Body('nomAuteur') nomAuteur: string): Promise<Creation> {
+  async createCreation(
+    @Body('nomAuteur') nomAuteur: string,
+  ): Promise<Creation> {
     return this.creationRepository.findOrCreate(nomAuteur);
   }
 }

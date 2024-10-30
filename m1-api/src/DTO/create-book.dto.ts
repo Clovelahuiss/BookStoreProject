@@ -1,5 +1,3 @@
-/* eslint-disable prettier/prettier */
-// src/dto/create-book.dto.ts
 import { IsNotEmpty, IsOptional, IsDecimal, IsString } from 'class-validator';
 
 export class CreateBookDto {
@@ -22,4 +20,3 @@ export class CreateBookDto {
   @IsNotEmpty()
   creationId: number;
 }
-

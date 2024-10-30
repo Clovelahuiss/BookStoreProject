@@ -40,6 +40,11 @@ export const addAuthor = async (author: NewAuthor): Promise<Author> => {
     return response.data;
 };
 
+export const getAuthorsWithPagination = async (limit: number, offset: number) => {
+    const response = await axios.get(`/api/authors?limit=${limit}&offset=${offset}`);
+    return response.data;
+};
+
 export const createAuthor = async (author: Author): Promise<Author> => {
     const response = await fetch(BASE_URL, {
         method: 'POST',

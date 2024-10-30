@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 import { Book } from '../models/book.entity';
 
 export class BookPresenter {
@@ -6,7 +5,7 @@ export class BookPresenter {
   title: string;
   publicationDate: string;
   summary?: string;
-  author?: { id: number; name: string }; // Rendre `author` optionnel
+  author?: { id: number; name: string };
 
   constructor(book: Book) {
     this.id = book.id;
@@ -15,8 +14,7 @@ export class BookPresenter {
     this.summary = book.summary;
     // Vérifie si `author` est défini avant d'accéder à ses propriétés
     this.author = book.creation?.author // Accéder à l’auteur via la relation `creation`
-    ? { id: book.creation.author.id, name: book.creation.author.name }
-    : null;
-
+      ? { id: book.creation.author.id, name: book.creation.author.name }
+      : null;
   }
 }

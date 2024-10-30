@@ -1,8 +1,16 @@
-/* eslint-disable prettier/prettier */
 /*Une fois le retour à la ligne fait ce sont des erreur 
 prettier de formatage
  que je n'arrive pas a resuoudre*/
-import { Controller, Get, Post, Put, Param, Body, Delete, Query } from '@nestjs/common';
+import {
+  Controller,
+  Get,
+  Post,
+  Put,
+  Param,
+  Body,
+  Delete,
+  Query,
+} from '@nestjs/common';
 import { BookService } from '../service/book.service';
 import { BookPresenter } from '../presenter/book.presenter';
 import { CreateBookDto } from '../dto/create-book.dto';
@@ -10,13 +18,13 @@ import { UpdateBookDto } from '../dto/update-book.dto';
 
 @Controller('books')
 export class BookController {
-  constructor(private readonly bookService: BookService  ) {}
+  constructor(private readonly bookService: BookService) {}
 
   @Get()
   async findAllBooks(
     @Query('title') title?: string,
     @Query('sortBy') sortBy?: string,
-    @Query('sortOrder') sortOrder: 'ASC' | 'DESC' = 'ASC'
+    @Query('sortOrder') sortOrder: 'ASC' | 'DESC' = 'ASC',
   ): Promise<BookPresenter[]> {
     return this.bookService.findAllBooks(title, sortBy, sortOrder);
   }
@@ -43,5 +51,4 @@ export class BookController {
   async deleteBook(@Param('id') id: string) {
     return this.bookService.deleteBook(Number(id));
   }
-
 }

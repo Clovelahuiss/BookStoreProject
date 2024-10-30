@@ -1,5 +1,10 @@
-/* eslint-disable prettier/prettier */
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, OneToMany } from 'typeorm';
+import {
+  Entity,
+  PrimaryGeneratedColumn,
+  Column,
+  ManyToOne,
+  OneToMany,
+} from 'typeorm';
 import { Author } from './author.entity';
 import { Book } from './book.entity';
 
@@ -11,7 +16,10 @@ export class Creation {
   @Column()
   nomCreation: string;
 
-  @ManyToOne(() => Author, (author) => author.creations, { nullable: true, onDelete: 'SET NULL' })
+  @ManyToOne(() => Author, (author) => author.creations, {
+    nullable: true,
+    onDelete: 'SET NULL',
+  })
   author?: Author; // Relation optionnelle avec l'auteur
 
   @OneToMany(() => Book, (book) => book.creation)

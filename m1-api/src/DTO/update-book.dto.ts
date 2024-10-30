@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 import { IsString, IsOptional, IsNumber, IsDecimal } from 'class-validator';
 
 export class UpdateBookDto {
@@ -20,5 +19,5 @@ export class UpdateBookDto {
 
   @IsDecimal()
   @IsOptional()
-  price?: number; // Prix du livre
+  price?: number;
 }

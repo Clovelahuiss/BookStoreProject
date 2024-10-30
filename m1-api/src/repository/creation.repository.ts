@@ -1,5 +1,3 @@
-/* eslint-disable prettier/prettier */
-
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { Repository, DataSource } from 'typeorm';
 import { Creation } from '../models/creation.entity';
@@ -14,7 +12,9 @@ export class CreationRepository extends Repository<Creation> {
   async findOrCreate(nomCreation: string, author?: Author): Promise<Creation> {
     // Vérifiez si nomCreation est défini
     if (!nomCreation) {
-      throw new BadRequestException("Le champ 'nomCreation' est requis pour créer une création.");
+      throw new BadRequestException(
+        "Le champ 'nomCreation' est requis pour créer une création.",
+      );
     }
 
     let creation = await this.findOne({ where: { nomCreation } });
