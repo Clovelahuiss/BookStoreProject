@@ -7,6 +7,26 @@ import { Edit, Check } from '@mui/icons-material';
 import { useParams } from 'next/navigation';
 import { Author } from '../../../models/Author';
 import { getAuthorById, updateAuthor } from '../../../services/authorService';
+import { Star, StarHalf, StarBorder } from '@mui/icons-material';
+
+const StarRating: React.FC<{ averageRating: number }> = ({ averageRating }) => {
+    // Calcul du nombre d'étoiles pleines, demi-pleines et vides
+    const fullStars = Math.floor(averageRating); // Nombre d'étoiles pleines
+    const hasHalfStar = averageRating - fullStars >= 0.5; // Présence d'une demi-étoile
+    const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0); // Étoiles vides restantes
+
+    return (
+        <Box display="flex" alignItems="center">
+            {[...Array(fullStars)].map((_, index) => (
+                <Star key={`full-${index}`} sx={{ color: '#FFD700' }} />
+            ))}
+            {hasHalfStar && <StarHalf sx={{ color: '#FFD700' }} />}
+            {[...Array(emptyStars)].map((_, index) => (
+                <StarBorder key={`empty-${index}`} sx={{ color: '#FFD700' }} />
+            ))}
+        </Box>
+    );
+};
 
 interface Book {
     id: number;
@@ -245,28 +265,32 @@ const AuthorDetailPage: React.FC = () => {
                 {getSortedBooks().length > 0 ? (
                     getSortedBooks().map((book) => (
                         <Grid item xs={12} sm={6} md={4} key={book.id}>
-                            <Link href={`/books/${book.id}`} passHref> {/* Ajoutez le lien vers la page du livre */}
-                                <Card variant="outlined" sx={{ transition: 'transform 0.2s', '&:hover': { transform: 'scale(1.05)' }, cursor: 'pointer' }}>
-                                    <CardContent>
-                                        <Typography variant="h6" color="primary" sx={{ fontWeight: 'bold' }}>
-                                            {book.title}
-                                        </Typography>
-                                        <Typography variant="body2" color="textSecondary">
-                                            Publié en {book.publicationDate}
-                                        </Typography>
-                                        <Typography variant="body2" sx={{ mt: 1 }}>
-                                            {book.summary}
-                                        </Typography>
-                                        <Typography variant="body2" color="textSecondary" sx={{ mt: 1 }}>
-                                            Prix : {book.price?.toFixed(2) || 'N/A'} €
-                                        </Typography>
-                                        <Typography variant="body2" color="textSecondary">
-                                            Note moyenne : {book.averageRating || 'N/A'}
-                                        </Typography>
-                                    </CardContent>
-                                </Card>
-                            </Link>
-                        </Grid>
+                                <Link href={`/books/${book.id}`} passHref style={{ textDecoration: 'none', color: 'inherit' }}> {/* Ajout de styles pour supprimer le soulignement et forcer la couleur */}
+                                    <Card variant="outlined" sx={{ transition: 'transform 0.2s', '&:hover': { transform: 'scale(1.05)' }, cursor: 'pointer' }}>
+                                        <CardContent>
+                                            <Typography variant="h6" color="textPrimary" sx={{ fontWeight: 'bold' }}> {/* Ajustement de la couleur */}
+                                                {book.title}
+                                            </Typography>
+                                            <Typography variant="body2" color="textSecondary">
+                                                Publié en {book.publicationDate}
+                                            </Typography>
+                                            <Typography variant="body2" sx={{ mt: 1 }}>
+                                                {book.summary}
+                                            </Typography>
+                                            <Typography variant="body2" color="textSecondary" sx={{ mt: 1 }}>
+                                                Prix : {book.price?.toFixed(2) || 'N/A'} €
+                                            </Typography>
+                                            <Box display="flex" alignItems="center" mt={1}>
+                                                <StarRating averageRating={book.averageRating || 0} />
+                                                <Typography variant="body2" color="textSecondary" sx={{ ml: 1 }}>
+                                                    {book.averageRating?.toFixed(1) || 'N/A'}
+                                                </Typography>
+                                            </Box>
+                                        </CardContent>
+                                    </Card>
+                                </Link>
+                            </Grid>
+
                     ))
                 ) : (
                     <Typography variant="body2" color="textSecondary" sx={{ mt: 2 }}>
