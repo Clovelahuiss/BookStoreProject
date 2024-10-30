@@ -7,6 +7,19 @@ import { useParams } from 'next/navigation';
 import { Author } from '../../../models/Author';
 import { getAuthorById, updateAuthor } from '../../../services/authorService';
 
+const Breadcrumb = ({ authorName }: { authorName: string }) => (
+    <nav className="text-gray-600 text-sm mb-4">
+        <Link href="/" className="text-blue-600 hover:underline">
+            Accueil
+        </Link>
+        {' > '}
+        <Link href="/authors" className="text-blue-600 hover:underline">
+            Auteurs
+        </Link>
+        {' > '}
+        <span className="text-gray-500">{authorName}</span>
+    </nav>
+);
 const StarRating: React.FC<{ averageRating: number }> = ({ averageRating }) => {
     const fullStars = Math.floor(averageRating);
     const hasHalfStar = averageRating - fullStars >= 0.5;
@@ -120,6 +133,7 @@ const AuthorDetailPage: React.FC = () => {
 
     return (
         <div className="p-6 max-w-4xl mx-auto">
+            {author && <Breadcrumb authorName={author.name} />}
             <div className="flex flex-col md:flex-row items-center mb-6">
                 <div 
                     className="relative w-full h-full rounded-full overflow-hidden shadow-lg mx-auto md:mx-0"

@@ -47,6 +47,7 @@ const AuthorsPage: React.FC = () => {
         }
     };
 
+        
     const toggleEditMode = () => setEditMode((prev) => !prev);
 
     const handleEdit = (authorId: number) => {

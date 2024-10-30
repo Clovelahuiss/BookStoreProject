@@ -8,7 +8,6 @@ import { BookModule } from './modules/book.module';
 import { DatabaseModule } from './modules/database.module';
 import { AuthorModule } from './modules/author.module';
 import { ReviewModule } from './modules/review.module';
-// eslint-disable-next-line prettier/prettier
 
 @Module({
   imports: [

@@ -1,4 +1,5 @@
 /* eslint-disable prettier/prettier */
+/*Impossible de fixer la règle prettier/prettier pour le retour à la ligne*/
 import { Controller, Get, Post, Body, Param, Query, Put, Delete } from '@nestjs/common';
 import { AuthorService } from '../service/author.service';
 import { CreateAuthorDto } from '../dto/create-author.dto';

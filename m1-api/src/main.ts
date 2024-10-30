@@ -1,4 +1,3 @@
-/* eslint-disable prettier/prettier */
 import { NestFactory } from '@nestjs/core';
 import { AppModule } from './app.module';
 import { config } from 'dotenv';
@@ -11,7 +10,7 @@ async function bootstrap() {
   app.useGlobalPipes(new ValidationPipe());
   app.enableCors();
   await app.listen(process.env.PORT);
-  app.enableCors(); 
+  app.enableCors();
 
   console.log(`🚀 API listening on PORT ${process.env.PORT}`);
 }

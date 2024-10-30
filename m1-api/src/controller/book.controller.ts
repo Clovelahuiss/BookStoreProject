@@ -1,4 +1,7 @@
 /* eslint-disable prettier/prettier */
+/*Une fois le retour à la ligne fait ce sont des erreur 
+prettier de formatage
+ que je n'arrive pas a resuoudre*/
 import { Controller, Get, Post, Put, Param, Body, Delete, Query } from '@nestjs/common';
 import { BookService } from '../service/book.service';
 import { BookPresenter } from '../presenter/book.presenter';
