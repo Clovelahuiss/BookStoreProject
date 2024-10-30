@@ -4,7 +4,6 @@ import React, { useState, useEffect } from 'react';
 import AddAuthorModal from '../components/AddAuthorModal';
 import EditAuthorModal from '../components/EditAuthorModal';
 import DeleteAuthorModal from '../components/DeleteAuthorModal';
-import { Button, Typography, Box, Grid, TextField } from '@mui/material';
 import AuthorCard from '../components/AuthorCard';
 import { Author } from '../models/Author';
 import { getAuthors, addAuthor, updateAuthor, deleteAuthor } from '../services/authorService';
@@ -16,7 +15,7 @@ const AuthorsPage: React.FC = () => {
     const [openDeleteModal, setOpenDeleteModal] = useState(false);
     const [editMode, setEditMode] = useState(false);
     const [selectedAuthor, setSelectedAuthor] = useState<Author | null>(null);
-    const [searchTerm, setSearchTerm] = useState(''); // Ajout du champ de recherche
+    const [searchTerm, setSearchTerm] = useState(''); // Champ de recherche
 
     const fetchAuthors = async () => {
         try {
@@ -31,7 +30,7 @@ const AuthorsPage: React.FC = () => {
         fetchAuthors();
     }, []);
 
-    const filteredAuthors = authors.filter(author => 
+    const filteredAuthors = authors.filter(author =>
         author.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
@@ -99,25 +98,29 @@ const AuthorsPage: React.FC = () => {
     };
 
     return (
-        <Box p={4}>
-            <Typography variant="h4" gutterBottom>
-                Liste des Auteurs
-            </Typography>
-            <Box display="flex" gap={2} mb={2}>
-                <Button variant="contained" color="primary" onClick={handleOpenAddModal}>
+        <div className="p-6">
+            <h1 className="text-2xl font-bold mb-6">Liste des Auteurs</h1>
+            <div className="flex gap-4 mb-6">
+                <button 
+                    className="bg-blue-600 text-white py-2 px-4 rounded shadow hover:bg-blue-700"
+                    onClick={handleOpenAddModal}
+                >
                     Ajouter un Auteur
-                </Button>
-                <Button variant="outlined" color="secondary" onClick={toggleEditMode}>
+                </button>
+                <button 
+                    className={`py-2 px-4 rounded shadow ${editMode ? 'bg-gray-600 text-white' : 'bg-white text-gray-700 border'} hover:bg-gray-700 hover:text-white`}
+                    onClick={toggleEditMode}
+                >
                     {editMode ? "Terminer" : "Modifier"}
-                </Button>
-                <TextField
-                    label="Rechercher un auteur"
-                    variant="outlined"
+                </button>
+                <input
+                    type="text"
+                    placeholder="Rechercher un auteur"
                     value={searchTerm}
                     onChange={(e) => setSearchTerm(e.target.value)}
-                    fullWidth
+                    className="flex-grow p-2 border rounded focus:outline-none focus:border-blue-500"
                 />
-            </Box>
+            </div>
             <AddAuthorModal open={openAddModal} onClose={handleCloseAddModal} onAddAuthor={handleAddAuthor} />
             {selectedAuthor && (
                 <EditAuthorModal
@@ -135,19 +138,19 @@ const AuthorsPage: React.FC = () => {
                     authorName={selectedAuthor.name}
                 />
             )}
-            <Grid container spacing={3} mt={2}>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-6">
                 {filteredAuthors.map((author) => (
-                    <Grid item xs={12} sm={6} md={4} key={author.id}>
+                    <div key={author.id}>
                         <AuthorCard
                             author={author}
                             editMode={editMode}
                             onEdit={() => handleEdit(author.id)}
                             onDelete={() => handleDelete(author.id)}
                         />
-                    </Grid>
+                    </div>
                 ))}
-            </Grid>
-        </Box>
+            </div>
+        </div>
     );
 };
 

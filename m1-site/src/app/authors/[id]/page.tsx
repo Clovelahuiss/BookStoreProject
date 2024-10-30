@@ -1,30 +1,27 @@
 'use client';
+import '../../../styles/global.css'; // Importation du fichier global contenant Tailwind
 
 import React, { useEffect, useState } from 'react';
-import Link from 'next/link';  // Importez le composant Link
-import { Box, Typography, Avatar, Grid, Card, CardContent, IconButton, TextField, Button, Dialog, DialogActions, DialogContent, DialogTitle, Select, MenuItem, FormControl, InputLabel, SelectChangeEvent } from '@mui/material';
-import { Edit, Check } from '@mui/icons-material';
+import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { Author } from '../../../models/Author';
 import { getAuthorById, updateAuthor } from '../../../services/authorService';
-import { Star, StarHalf, StarBorder } from '@mui/icons-material';
 
 const StarRating: React.FC<{ averageRating: number }> = ({ averageRating }) => {
-    // Calcul du nombre d'étoiles pleines, demi-pleines et vides
-    const fullStars = Math.floor(averageRating); // Nombre d'étoiles pleines
-    const hasHalfStar = averageRating - fullStars >= 0.5; // Présence d'une demi-étoile
-    const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0); // Étoiles vides restantes
+    const fullStars = Math.floor(averageRating);
+    const hasHalfStar = averageRating - fullStars >= 0.5;
+    const emptyStars = 5 - fullStars - (hasHalfStar ? 1 : 0);
 
     return (
-        <Box display="flex" alignItems="center">
+        <div className="flex items-center">
             {[...Array(fullStars)].map((_, index) => (
-                <Star key={`full-${index}`} sx={{ color: '#FFD700' }} />
+                <span key={`full-${index}`} className="text-yellow-500">★</span>
             ))}
-            {hasHalfStar && <StarHalf sx={{ color: '#FFD700' }} />}
+            {hasHalfStar && <span className="text-yellow-500">½</span>}
             {[...Array(emptyStars)].map((_, index) => (
-                <StarBorder key={`empty-${index}`} sx={{ color: '#FFD700' }} />
+                <span key={`empty-${index}`} className="text-gray-300">★</span>
             ))}
-        </Box>
+        </div>
     );
 };
 
@@ -50,16 +47,8 @@ interface AuthorWithCreations extends Author {
 const AuthorDetailPage: React.FC = () => {
     const { id } = useParams();
     const [author, setAuthor] = useState<AuthorWithCreations | null>(null);
-    const [isEditing, setIsEditing] = useState({
-        name: false,
-        bio: false,
-        photo: false,
-    });
-    const [editedFields, setEditedFields] = useState({
-        name: '',
-        bio: '',
-        photo: '',
-    });
+    const [isEditing, setIsEditing] = useState({ name: false, bio: false, photo: false });
+    const [editedFields, setEditedFields] = useState({ name: '', bio: '', photo: '' });
     const [isPhotoModalOpen, setIsPhotoModalOpen] = useState(false);
     const [photoUrl, setPhotoUrl] = useState('');
     const [sortType, setSortType] = useState(''); // État pour le type de tri sélectionné
@@ -69,10 +58,7 @@ const AuthorDetailPage: React.FC = () => {
             if (id) {
                 try {
                     const authorData = await getAuthorById(Number(id));
-                    setAuthor({
-                        ...(authorData as AuthorWithCreations),
-                        creations: authorData.creations || [],
-                    });
+                    setAuthor({ ...(authorData as AuthorWithCreations), creations: authorData.creations || [] });
                     setEditedFields({
                         name: authorData.name,
                         bio: authorData.bio || '',
@@ -88,7 +74,6 @@ const AuthorDetailPage: React.FC = () => {
 
     const handleSave = async (field: 'name' | 'bio' | 'photo') => {
         if (!author) return;
-        
         try {
             const updatedAuthor = await updateAuthor(author.id, { [field]: editedFields[field] });
             setAuthor((prev) => prev ? { ...prev, ...updatedAuthor } : prev);
@@ -105,223 +90,115 @@ const AuthorDetailPage: React.FC = () => {
         setEditedFields((prev) => ({ ...prev, photo: photoUrl }));
         setAuthor((prev) => prev ? { ...prev, photo: photoUrl } : prev);
         closePhotoModal();
-        
         if (author) {
             try {
                 await updateAuthor(author.id, { photo: photoUrl });
-                console.log("Photo mise à jour avec succès dans la base de données");
             } catch (error) {
                 console.error("Erreur lors de la mise à jour de la photo :", error);
             }
         }
     };
 
-    const handleSortChange = (event: SelectChangeEvent<string>) => {
-        setSortType(event.target.value as string);
+    const handleSortChange = (event: React.ChangeEvent<HTMLSelectElement>) => {
+        setSortType(event.target.value);
     };
 
     const getSortedBooks = () => {
         if (!author || !author.creations[0]?.books) return [];
-
         const books = [...author.creations[0].books];
         switch (sortType) {
-            case 'priceAsc':
-                return books.sort((a, b) => (a.price || 0) - (b.price || 0));
-            case 'priceDesc':
-                return books.sort((a, b) => (b.price || 0) - (a.price || 0));
-            case 'alphaAsc':
-                return books.sort((a, b) => a.title.localeCompare(b.title));
-            case 'alphaDesc':
-                return books.sort((a, b) => b.title.localeCompare(a.title));
-            case 'dateAsc':
-                return books.sort((a, b) => new Date(a.publicationDate).getTime() - new Date(b.publicationDate).getTime());
-            case 'dateDesc':
-                return books.sort((a, b) => new Date(b.publicationDate).getTime() - new Date(a.publicationDate).getTime());
-            case 'ratingDesc':
-                return books.sort((a, b) => (b.averageRating || 0) - (a.averageRating || 0));
-            default:
-                return books;
+            case 'priceAsc': return books.sort((a, b) => (a.price || 0) - (b.price || 0));
+            case 'priceDesc': return books.sort((a, b) => (b.price || 0) - (a.price || 0));
+            case 'alphaAsc': return books.sort((a, b) => a.title.localeCompare(b.title));
+            case 'alphaDesc': return books.sort((a, b) => b.title.localeCompare(a.title));
+            case 'dateAsc': return books.sort((a, b) => new Date(a.publicationDate).getTime() - new Date(b.publicationDate).getTime());
+            case 'dateDesc': return books.sort((a, b) => new Date(b.publicationDate).getTime() - new Date(a.publicationDate).getTime());
+            case 'ratingDesc': return books.sort((a, b) => (b.averageRating || 0) - (a.averageRating || 0));
+            default: return books;
         }
     };
 
     return (
-        <Box p={4} sx={{ maxWidth: '900px', mx: 'auto' }}>
-            <Box display="flex" flexDirection={{ xs: 'column', md: 'row' }} alignItems="center" mb={4}>
-                {/* Photo de profil avec survol pour modification */}
-                <Box 
-                    sx={{
-                        position: 'relative',
-                        width: 150,
-                        height: 150,
-                        borderRadius: '50%',
-                        overflow: 'hidden',
-                        boxShadow: 3,
-                        flexShrink: 0,
-                        mx: 'auto',
-                    }}
+        <div className="p-6 max-w-4xl mx-auto">
+            <div className="flex flex-col md:flex-row items-center mb-6">
+                <div 
+                    className="relative w-full h-full rounded-full overflow-hidden shadow-lg mx-auto md:mx-0"
                     onMouseEnter={() => setIsEditing((prev) => ({ ...prev, photo: true }))}
                     onMouseLeave={() => setIsEditing((prev) => ({ ...prev, photo: false }))}
                 >
-                    <Avatar
-                        src={editedFields.photo || author?.photo || ''}
-                        alt={author?.name}
-                        sx={{
-                            width: '100%',
-                            height: '100%',
-                            objectFit: 'cover',
-                            border: '4px solid #3f51b5',
-                        }}
-                    />
+                    <img src={editedFields.photo || author?.photo || ''} alt={author?.name} className="w-full h-full object-cover border-4 " />
                     {isEditing.photo && (
-                        <Box
-                            position="absolute"
-                            top={0}
-                            left={0}
-                            right={0}
-                            bottom={0}
-                            display="flex"
-                            alignItems="center"
-                            justifyContent="center"
-                            sx={{
-                                bgcolor: 'rgba(0, 0, 0, 0.5)', 
-                                color: 'white',
-                                cursor: 'pointer',
-                            }}
-                            onClick={openPhotoModal}
-                        >
-                            <Edit sx={{ color: 'white', fontSize: 32 }} />
-                        </Box>
+                        <button onClick={openPhotoModal} className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center text-white">
+                            Modifier
+                        </button>
                     )}
-                </Box>
-
-                <Box ml={{ md: 3 }} mt={{ xs: 2, md: 0 }} flexGrow={1}>
+                </div>
+                <div className="ml-4 mt-4 md:mt-0">
                     {isEditing.name ? (
-                        <Box display="flex" alignItems="center">
-                            <TextField
+                        <div className="flex items-center">
+                            <input
                                 value={editedFields.name}
                                 onChange={(e) => setEditedFields((prev) => ({ ...prev, name: e.target.value }))}
-                                autoFocus
-                                variant="outlined"
-                                fullWidth
-                                sx={{ fontSize: '2rem', fontWeight: 'bold' }}
+                                className="p-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                                placeholder="Entrez le nom"
                             />
-                            <Button onClick={() => handleSave('name')} startIcon={<Check />} sx={{ ml: 1 }}>
+                            <button onClick={() => handleSave('name')} className="ml-2 bg-blue-600 text-white py-1 px-3 rounded-lg">
                                 Sauvegarder
-                            </Button>
-                        </Box>
+                            </button>
+                        </div>
                     ) : (
-                        <Typography variant="h4" fontWeight="bold" color="primary" sx={{ display: 'flex', alignItems: 'center' }}>
-                            {author?.name}
-                            <IconButton onClick={() => setIsEditing((prev) => ({ ...prev, name: true }))}>
-                                <Edit fontSize="small" />
-                            </IconButton>
-                        </Typography>
+                        <h2 className="text-2xl font-bold text-blue-600">{author?.name}</h2>
                     )}
                     {isEditing.bio ? (
-                        <Box display="flex" alignItems="center" width="100%" mt={2}>
-                            <TextField
+                        <div className="flex flex-col mt-2">
+                            <textarea
                                 value={editedFields.bio}
                                 onChange={(e) => setEditedFields((prev) => ({ ...prev, bio: e.target.value }))}
-                                autoFocus
-                                fullWidth
-                                multiline
-                                rows={3}
-                                variant="outlined"
+                                className="p-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
+                                placeholder="Entrez la biographie"
                             />
-                            <Button onClick={() => handleSave('bio')} startIcon={<Check />} sx={{ ml: 1 }}>
+                            <button onClick={() => handleSave('bio')} className="mt-2 bg-blue-600 text-white py-1 px-3 rounded-lg">
                                 Sauvegarder
-                            </Button>
-                        </Box>
+                            </button>
+                        </div>
                     ) : (
-                        <Typography variant="body1" color="textSecondary" sx={{ mt: 1, fontSize: '1.1rem' }}>
-                            {author?.bio || "Biographie non disponible"}
-                            <IconButton onClick={() => setIsEditing((prev) => ({ ...prev, bio: true }))} sx={{ ml: 1 }}>
-                                <Edit fontSize="small" />
-                            </IconButton>
-                        </Typography>
+                        <p className="mt-2 text-gray-600">{author?.bio || "Biographie non disponible"}</p>
                     )}
-                </Box>
-            </Box>
+                </div>
+            </div>
 
-            {/* Tri */}
-            <FormControl fullWidth variant="outlined" sx={{ mb: 4 }}>
-                <InputLabel>Tri</InputLabel>
-                <Select value={sortType} onChange={handleSortChange} label="Tri">
-                    <MenuItem value="">Aucun tri</MenuItem>
-                    <MenuItem value="priceAsc">Prix croissant</MenuItem>
-                    <MenuItem value="priceDesc">Prix décroissant</MenuItem>
-                    <MenuItem value="alphaAsc">Ordre alphabétique (A-Z)</MenuItem>
-                    <MenuItem value="alphaDesc">Ordre alphabétique (Z-A)</MenuItem>
-                    <MenuItem value="dateAsc">Date de parution croissante</MenuItem>
-                    <MenuItem value="dateDesc">Date de parution décroissante</MenuItem>
-                    <MenuItem value="ratingDesc">Mieux notés</MenuItem>
-                </Select>
-            </FormControl>
+            <div className="flex justify-between items-center mb-4">
+                <h3 className="text-xl font-semibold text-blue-600">Livres écrits par {author?.name} :</h3>
+                <label htmlFor="sortBooks" className="sr-only">Trier les livres</label>
+                <select id="sortBooks" value={sortType} onChange={handleSortChange} className="p-2 border border-gray-300 rounded-lg focus:outline-none">
+                    <option value="">Aucun tri</option>
+                    <option value="priceAsc">Prix croissant</option>
+                    <option value="priceDesc">Prix décroissant</option>
+                    <option value="alphaAsc">Ordre alphabétique (A-Z)</option>
+                    <option value="alphaDesc">Ordre alphabétique (Z-A)</option>
+                    <option value="dateAsc">Date de parution croissante</option>
+                    <option value="dateDesc">Date de parution décroissante</option>
+                    <option value="ratingDesc">Mieux notés</option>
+                </select>
+            </div>
 
-            <Typography variant="h5" gutterBottom sx={{ mt: 4, fontWeight: 'bold', color: '#3f51b5' }}>
-                Livres écrits par {author?.name} :
-            </Typography>
-            <Grid container spacing={3}>
-                {getSortedBooks().length > 0 ? (
-                    getSortedBooks().map((book) => (
-                        <Grid item xs={12} sm={6} md={4} key={book.id}>
-                                <Link href={`/books/${book.id}`} passHref style={{ textDecoration: 'none', color: 'inherit' }}> {/* Ajout de styles pour supprimer le soulignement et forcer la couleur */}
-                                    <Card variant="outlined" sx={{ transition: 'transform 0.2s', '&:hover': { transform: 'scale(1.05)' }, cursor: 'pointer' }}>
-                                        <CardContent>
-                                            <Typography variant="h6" color="textPrimary" sx={{ fontWeight: 'bold' }}> {/* Ajustement de la couleur */}
-                                                {book.title}
-                                            </Typography>
-                                            <Typography variant="body2" color="textSecondary">
-                                                Publié en {book.publicationDate}
-                                            </Typography>
-                                            <Typography variant="body2" sx={{ mt: 1 }}>
-                                                {book.summary}
-                                            </Typography>
-                                            <Typography variant="body2" color="textSecondary" sx={{ mt: 1 }}>
-                                                Prix : {book.price?.toFixed(2) || 'N/A'} €
-                                            </Typography>
-                                            <Box display="flex" alignItems="center" mt={1}>
-                                                <StarRating averageRating={book.averageRating || 0} />
-                                                <Typography variant="body2" color="textSecondary" sx={{ ml: 1 }}>
-                                                    {book.averageRating?.toFixed(1) || 'N/A'}
-                                                </Typography>
-                                            </Box>
-                                        </CardContent>
-                                    </Card>
-                                </Link>
-                            </Grid>
-
-                    ))
-                ) : (
-                    <Typography variant="body2" color="textSecondary" sx={{ mt: 2 }}>
-                        Aucun livre disponible pour cette création.
-                    </Typography>
-                )}
-            </Grid>
-
-            {/* Modal pour l'URL de la photo */}
-            <Dialog open={isPhotoModalOpen} onClose={closePhotoModal}>
-                <DialogTitle>Modifier l'URL de la photo</DialogTitle>
-                <DialogContent>
-                    <TextField
-                        label="URL de la photo"
-                        type="url"
-                        fullWidth
-                        variant="outlined"
-                        value={photoUrl}
-                        onChange={(e) => setPhotoUrl(e.target.value)}
-                    />
-                </DialogContent>
-                <DialogActions>
-                    <Button onClick={closePhotoModal} color="secondary">
-                        Annuler
-                    </Button>
-                    <Button onClick={handlePhotoSave} color="primary">
-                        Sauvegarder
-                    </Button>
-                </DialogActions>
-            </Dialog>
-        </Box>
+            <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
+                {getSortedBooks().map((book) => (
+                    <Link key={book.id} href={`/books/${book.id}`} passHref>
+                        <div className="border border-gray-200 rounded-lg p-4 shadow hover:shadow-lg transition duration-200 cursor-pointer">
+                            <h4 className="font-bold text-lg text-blue-700">{book.title}</h4>
+                            <p className="text-sm text-gray-600">Publié en {book.publicationDate}</p>
+                            <p className="mt-2 text-gray-700">{book.summary}</p>
+                            <p className="mt-2 text-gray-500">Prix : {book.price?.toFixed(2) || 'N/A'} €</p>
+                            <div className="flex items-center mt-2">
+                                <StarRating averageRating={book.averageRating || 0} />
+                                <span className="ml-2 text-gray-500">{book.averageRating?.toFixed(1) || 'N/A'}</span>
+                            </div>
+                        </div>
+                    </Link>
+                ))}
+            </div>
+        </div>
     );
 };
 
