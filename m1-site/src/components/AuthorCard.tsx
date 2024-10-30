@@ -8,9 +8,10 @@ interface AuthorCardProps {
     editMode: boolean;
     onEdit: () => void;
     onDelete: () => void;
+    averageRating?: number | null; // Ajout de la moyenne des notes en tant que prop
 }
 
-const AuthorCard: React.FC<AuthorCardProps> = ({ author, editMode, onEdit, onDelete }) => {
+const AuthorCard: React.FC<AuthorCardProps> = ({ author, editMode, onEdit, onDelete, averageRating }) => {
     return (
         <Link href={`/authors/${author.id}`} passHref style={{ textDecoration: 'none', color: 'inherit' }}>
             <Card
@@ -37,7 +38,7 @@ const AuthorCard: React.FC<AuthorCardProps> = ({ author, editMode, onEdit, onDel
                         Livres écrits : {author.bookCount || '0'}
                     </Typography>
                     <Typography variant="body2" color="text.secondary" align="center">
-                        Note moyenne : {author.averageRating || 'N/A'}
+                        Note moyenne : {averageRating ? averageRating.toFixed(1) : 'N/A'}
                     </Typography>
                 </CardContent>
                 {editMode && (

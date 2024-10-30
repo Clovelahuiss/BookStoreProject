@@ -17,8 +17,8 @@ export class AuthorService {
   async findAllAuthors(search?: string) {
     const authorsQuery = this.authorRepository
       .createQueryBuilder('author')
-      .leftJoinAndSelect('author.creations', 'creation') // Remplacer par creations
-      .leftJoinAndSelect('creation.books', 'book'); // Utiliser creations.books pour récupérer les livres
+      .leftJoinAndSelect('author.creations', 'creation')
+      .leftJoinAndSelect('creation.books', 'book');
 
     if (search) {
       authorsQuery.where('author.name LIKE :search', { search: `%${search}%` });
@@ -26,19 +26,26 @@ export class AuthorService {
 
     const authors = await authorsQuery.getMany();
 
-    return authors.map((author) => ({
-      id: author.id,
-      name: author.name,
-      photo: author.photo,
-      bio: author.bio,
-      bookCount: author.creations
-        ? author.creations.reduce(
-            (count, creation) => count + (creation.books?.length || 0),
-            0,
-          )
-        : 0, // Compte via creations
-      idCreations: author.creations.map((creation) => creation.id) || [], // Inclure les ID de créations
-    }));
+    return authors.map((author) => {
+      const books = author.creations.flatMap(
+        (creation) => creation.books || [],
+      );
+      const totalRatings = books.reduce(
+        (sum, book) => sum + (book.averageRating || 0),
+        0,
+      );
+      const averageRating = books.length ? totalRatings / books.length : null;
+
+      return {
+        id: author.id,
+        name: author.name,
+        photo: author.photo,
+        bio: author.bio,
+        bookCount: books.length,
+        idCreations: author.creations.map((creation) => creation.id) || [],
+        averageRating: averageRating, // Ajoute la moyenne des notes ici
+      };
+    });
   }
 
   async createAuthor(createAuthorDto: CreateAuthorDto): Promise<Author> {

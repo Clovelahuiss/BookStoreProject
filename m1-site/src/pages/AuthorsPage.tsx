@@ -148,13 +148,15 @@ const AuthorsPage: React.FC = () => {
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4 mt-6">
                 {filteredAuthors.map((author) => (
                     <div key={author.id}>
-                        <AuthorCard
-                            author={author}
-                            editMode={editMode}
-                            onEdit={() => handleEdit(author.id)}
-                            onDelete={() => handleDelete(author.id)}
-                        />
-                    </div>
+                    <AuthorCard
+                        author={author}
+                        editMode={editMode}
+                        onEdit={() => handleEdit(author.id)}
+                        onDelete={() => handleDelete(author.id)}
+                        averageRating={author.averageRating} // Passe la moyenne ici
+                    />
+                </div>
+                
                 ))}
             </div>
         </div>

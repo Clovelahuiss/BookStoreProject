@@ -17,4 +17,13 @@ export class Author {
 
   @OneToMany(() => Creation, (creation) => creation.author)
   creations: Creation[];
+
+  getAverageRating() {
+    const books = this.creations.flatMap((creation) => creation.books || []);
+    const totalRatings = books.reduce(
+      (sum, book) => sum + (book.averageRating || 0),
+      0,
+    );
+    return books.length ? totalRatings / books.length : null;
+  }
 }
