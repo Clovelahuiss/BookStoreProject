@@ -17,7 +17,8 @@ const AuthorCard: React.FC<AuthorCardProps> = ({ author, editMode, onEdit, onDel
             <Card
                 variant="outlined"
                 sx={{
-                    maxWidth: 300,
+                    width: '100%',
+                    maxWidth: '100%', // Assure que chaque carte prend toute la place disponible
                     cursor: 'pointer',
                     transition: 'transform 0.2s ease-in-out',
                     '&:hover': {
@@ -27,6 +28,7 @@ const AuthorCard: React.FC<AuthorCardProps> = ({ author, editMode, onEdit, onDel
                     textDecoration: 'none',
                 }}
             >
+
                 <CardContent>
                     <Box display="flex" justifyContent="center" mb={2}>
                         <Avatar src={author.photo || ''} sx={{ width: 100, height: 100 }} />

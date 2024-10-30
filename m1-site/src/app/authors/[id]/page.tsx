@@ -1,12 +1,14 @@
 'use client';
+
 import '../../../styles/global.css'; // Importation du fichier global contenant Tailwind
 
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useState, useRef  } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { Author } from '../../../models/Author';
 import { getAuthorById, updateAuthor } from '../../../services/authorService';
-
+import { PencilIcon } from '@heroicons/react/solid';
+import PhotoUrlModal from '../../../components/PhotoUrlModal';
 const Breadcrumb = ({ authorName }: { authorName: string }) => (
     <nav className="text-gray-600 text-sm mb-4">
         <Link href="/" className="text-blue-600 hover:underline">
@@ -20,6 +22,7 @@ const Breadcrumb = ({ authorName }: { authorName: string }) => (
         <span className="text-gray-500">{authorName}</span>
     </nav>
 );
+
 const StarRating: React.FC<{ averageRating: number }> = ({ averageRating }) => {
     const fullStars = Math.floor(averageRating);
     const hasHalfStar = averageRating - fullStars >= 0.5;
@@ -60,11 +63,11 @@ interface AuthorWithCreations extends Author {
 const AuthorDetailPage: React.FC = () => {
     const { id } = useParams();
     const [author, setAuthor] = useState<AuthorWithCreations | null>(null);
-    const [isEditing, setIsEditing] = useState({ name: false, bio: false, photo: false });
+    const [isEditing, setIsEditing] = useState({ name: false, bio: false });
     const [editedFields, setEditedFields] = useState({ name: '', bio: '', photo: '' });
-    const [isPhotoModalOpen, setIsPhotoModalOpen] = useState(false);
-    const [photoUrl, setPhotoUrl] = useState('');
     const [sortType, setSortType] = useState(''); // État pour le type de tri sélectionné
+    const [isPhotoModalOpen, setIsPhotoModalOpen] = useState(false); // État pour le modal de photo
+    const textareaRef = useRef<HTMLTextAreaElement>(null); // Référence pour la `textarea`
 
     useEffect(() => {
         const fetchAuthor = async () => {
@@ -85,6 +88,10 @@ const AuthorDetailPage: React.FC = () => {
         fetchAuthor();
     }, [id]);
 
+    useEffect(() => {
+        adjustTextareaHeight(); // Ajuste la hauteur dès que le texte de la biographie change
+    }, [editedFields.bio]);
+
     const handleSave = async (field: 'name' | 'bio' | 'photo') => {
         if (!author) return;
         try {
@@ -93,22 +100,6 @@ const AuthorDetailPage: React.FC = () => {
             setIsEditing((prev) => ({ ...prev, [field]: false }));
         } catch (error) {
             console.error("Erreur lors de la mise à jour de l'auteur :", error);
-        }
-    };
-
-    const openPhotoModal = () => setIsPhotoModalOpen(true);
-    const closePhotoModal = () => setIsPhotoModalOpen(false);
-
-    const handlePhotoSave = async () => {
-        setEditedFields((prev) => ({ ...prev, photo: photoUrl }));
-        setAuthor((prev) => prev ? { ...prev, photo: photoUrl } : prev);
-        closePhotoModal();
-        if (author) {
-            try {
-                await updateAuthor(author.id, { photo: photoUrl });
-            } catch (error) {
-                console.error("Erreur lors de la mise à jour de la photo :", error);
-            }
         }
     };
 
@@ -131,56 +122,110 @@ const AuthorDetailPage: React.FC = () => {
         }
     };
 
+    const adjustTextareaHeight = () => {
+        if (textareaRef.current) {
+            textareaRef.current.style.height = "auto"; // Réinitialiser la hauteur
+            textareaRef.current.style.height = `${textareaRef.current.scrollHeight}px`; // Ajuster à la hauteur du contenu
+        }
+    };
+
+    const openPhotoModal = () => {
+        setIsPhotoModalOpen(true);
+    };
+
+    const closePhotoModal = () => {
+        setIsPhotoModalOpen(false);
+    };
+
+    const handlePhotoSave = (newPhotoUrl: string) => {
+        setEditedFields((prev) => ({ ...prev, photo: newPhotoUrl }));
+        handleSave('photo');
+        closePhotoModal();
+    };
+
     return (
         <div className="p-6 max-w-4xl mx-auto">
             {author && <Breadcrumb authorName={author.name} />}
-            <div className="flex flex-col md:flex-row items-center mb-6">
-                <div 
-                    className="relative w-full h-full rounded-full overflow-hidden shadow-lg mx-auto md:mx-0"
-                    onMouseEnter={() => setIsEditing((prev) => ({ ...prev, photo: true }))}
-                    onMouseLeave={() => setIsEditing((prev) => ({ ...prev, photo: false }))}
-                >
-                    <img src={editedFields.photo || author?.photo || ''} alt={author?.name} className="w-full h-full object-cover border-4 " />
-                    {isEditing.photo && (
-                        <button onClick={openPhotoModal} className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center text-white">
-                            Modifier
-                        </button>
-                    )}
+    
+            <div className="flex flex-col md:flex-row items-center mb-6 space-y-4 md:space-y-0 md:space-x-6">
+                {/* Zone photo de l'auteur avec une taille fixe */}
+                <div className="relative w-36 h-36 flex-shrink-0 rounded-full overflow-hidden shadow-lg group">
+                    <img
+                        src={editedFields.photo || author?.photo || ''}
+                        alt={author?.name}
+                        className="object-cover w-full h-full border-4"
+                    />
+                    {/* Superposition avec le stylo */}
+                    <div
+                        className="absolute inset-0 bg-black bg-opacity-50 flex items-center justify-center opacity-0 group-hover:opacity-100 transition-opacity cursor-pointer"
+                        onClick={openPhotoModal}
+                    >
+                        <PencilIcon className="w-8 h-8 text-white" />
+                    </div>
                 </div>
-                <div className="ml-4 mt-4 md:mt-0">
-                    {isEditing.name ? (
-                        <div className="flex items-center">
-                            <input
-                                value={editedFields.name}
-                                onChange={(e) => setEditedFields((prev) => ({ ...prev, name: e.target.value }))}
-                                className="p-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-                                placeholder="Entrez le nom"
-                            />
-                            <button onClick={() => handleSave('name')} className="ml-2 bg-blue-600 text-white py-1 px-3 rounded-lg">
-                                Sauvegarder
-                            </button>
+
+                {/* Zone d'information de l'auteur */}
+                <div className="flex flex-col space-y-4 full-w-md">
+                    {/* Nom de l'auteur avec un champ d'édition */}
+                    <div className="flex items-center">
+                        {isEditing.name ? (
+                            <div className="flex items-center">
+                                <input
+                                    value={editedFields.name}
+                                    onChange={(e) => setEditedFields((prev) => ({ ...prev, name: e.target.value }))}
+                                    className="p-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 w-full max-w-xs"
+                                    placeholder="Entrez le nom"
+                                />
+                                <button onClick={() => handleSave('name')} className="ml-2 bg-blue-600 text-white py-1 px-3 rounded-lg">
+                                    Sauvegarder
+                                </button>
+                            </div>
+                        ) : (
+                            <div className="flex items-center space-x-2">
+                                <h2 className="text-2xl font-bold text-blue-600 truncate max-w-xs">{author?.name}</h2>
+                                <PencilIcon
+                                    onClick={() => setIsEditing((prev) => ({ ...prev, name: true }))}
+                                    className="w-5 h-5 cursor-pointer text-gray-600 hover:text-gray-800"
+                                />
+                            </div>
+                        )}
+                    </div>
+    
+                    {/* Biographie de l'auteur */}
+                    <div className="flex items-start justify-between w-full">
+                            {isEditing.bio ? (
+                                <div className="flex flex-col w-full">
+                                    <textarea
+                                        ref={textareaRef}
+                                        value={editedFields.bio}
+                                        onChange={(e) => {
+                                            setEditedFields((prev) => ({ ...prev, bio: e.target.value }));
+                                            adjustTextareaHeight(); // Ajuste dynamiquement la hauteur
+                                        }}
+                                        className="p-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500 w-full textarea-auto-height"
+                                        placeholder="Entrez la biographie"
+                                    />
+                                    <button onClick={() => handleSave('bio')} className="mt-2 bg-blue-600 text-white py-1 px-3 rounded-lg w-full md:w-auto">
+                                        Sauvegarder
+                                    </button>
+                                </div>
+                            ) : (
+                                <div className="flex items-center w-full">
+                                    <p className="text-gray-600 flex-1">
+                                        {author?.bio || "Biographie non disponible"}
+                                    </p>
+                                    <PencilIcon
+                                        className="w-5 h-5 text-gray-500 cursor-pointer ml-2"
+                                        onClick={() => setIsEditing({ ...isEditing, bio: true })}
+                                    />
+                                </div>
+                            )}
                         </div>
-                    ) : (
-                        <h2 className="text-2xl font-bold text-blue-600">{author?.name}</h2>
-                    )}
-                    {isEditing.bio ? (
-                        <div className="flex flex-col mt-2">
-                            <textarea
-                                value={editedFields.bio}
-                                onChange={(e) => setEditedFields((prev) => ({ ...prev, bio: e.target.value }))}
-                                className="p-2 border border-gray-300 rounded-lg focus:outline-none focus:border-blue-500"
-                                placeholder="Entrez la biographie"
-                            />
-                            <button onClick={() => handleSave('bio')} className="mt-2 bg-blue-600 text-white py-1 px-3 rounded-lg">
-                                Sauvegarder
-                            </button>
-                        </div>
-                    ) : (
-                        <p className="mt-2 text-gray-600">{author?.bio || "Biographie non disponible"}</p>
-                    )}
+
                 </div>
             </div>
-
+    
+            {/* Tri et liste des livres */}
             <div className="flex justify-between items-center mb-4">
                 <h3 className="text-xl font-semibold text-blue-600">Livres écrits par {author?.name} :</h3>
                 <label htmlFor="sortBooks" className="sr-only">Trier les livres</label>
@@ -195,7 +240,7 @@ const AuthorDetailPage: React.FC = () => {
                     <option value="ratingDesc">Mieux notés</option>
                 </select>
             </div>
-
+    
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                 {getSortedBooks().map((book) => (
                     <Link key={book.id} href={`/books/${book.id}`} passHref>
@@ -212,8 +257,20 @@ const AuthorDetailPage: React.FC = () => {
                     </Link>
                 ))}
             </div>
+
+            {/* Modal pour l'URL de la photo */}
+            {isPhotoModalOpen && (
+                <PhotoUrlModal
+                    open={isPhotoModalOpen}
+                    onClose={closePhotoModal}
+                    onSave={handlePhotoSave}
+                />
+            )}
         </div>
     );
+    
+    
+    
 };
 
 export default AuthorDetailPage;
