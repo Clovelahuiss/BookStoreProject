@@ -1,18 +1,23 @@
 /* eslint-disable prettier/prettier */
-import { Entity, PrimaryGeneratedColumn, Column, ManyToOne } from 'typeorm';
+// src/models/review.entity.ts
+
+import { Entity, PrimaryGeneratedColumn, Column, ManyToOne, CreateDateColumn } from 'typeorm';
 import { Book } from './book.entity';
 
 @Entity()
 export class Review {
-  @PrimaryGeneratedColumn()
-  id: number;
+    @PrimaryGeneratedColumn()
+    id: number;
 
-  @Column()
-  rating: number;
+    @Column({ type: 'int', width: 1 })
+    rating: number;  // Note de 1 à 5
 
-  @Column({ type: 'text' })
-  comment: string;
+    @Column({ type: 'text', nullable: true })
+    comment: string;  // Commentaire optionnel
 
-  @ManyToOne(() => Book, (book) => book.reviews, { onDelete: 'CASCADE' })  // Relation avec Book
-  book: Book;
+    @CreateDateColumn()
+    createdAt: Date;
+
+    @ManyToOne(() => Book, (book) => book.reviews, { onDelete: 'CASCADE' })
+    book: Book;
 }

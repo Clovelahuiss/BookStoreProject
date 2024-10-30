@@ -5,7 +5,6 @@ import { Book } from '../models/book.entity';
 import { BookRepository } from '../repository/book.repository';
 import { CreateBookDto } from '../dto/create-book.dto';
 import { UpdateBookDto } from '../dto/update-book.dto';
-import { CreateReviewDto } from '../dto/create-review.dto';
 import { CreationRepository } from '../repository/creation.repository';
 
 
@@ -68,7 +67,5 @@ async createBook(createBookDto: CreateBookDto): Promise<Book> {
     await this.bookRepository.remove(book);
   }
 
-  async addReview(bookId: number, createReviewDto: CreateReviewDto): Promise<void> {
-   }
 
 }

@@ -1,5 +1,5 @@
 /* eslint-disable prettier/prettier */
-import { IsInt, Min, Max, IsString, IsOptional } from 'class-validator';
+import { IsInt, Min, Max, IsString, IsOptional, IsNotEmpty } from 'class-validator';
 
 export class CreateReviewDto {
   @IsInt()
@@ -10,4 +10,7 @@ export class CreateReviewDto {
   @IsString()
   @IsOptional()
   comment?: string;
+
+  @IsNotEmpty()
+  bookId: number;
 }

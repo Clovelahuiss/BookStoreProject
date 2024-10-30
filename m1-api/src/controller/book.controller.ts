@@ -4,11 +4,10 @@ import { BookService } from '../service/book.service';
 import { BookPresenter } from '../presenter/book.presenter';
 import { CreateBookDto } from '../dto/create-book.dto';
 import { UpdateBookDto } from '../dto/update-book.dto';
-import { CreateReviewDto } from '../dto/create-review.dto';
 
 @Controller('books')
 export class BookController {
-  constructor(private readonly bookService: BookService) {}
+  constructor(private readonly bookService: BookService  ) {}
 
   @Get()
   async findAllBooks(
@@ -42,8 +41,4 @@ export class BookController {
     return this.bookService.deleteBook(Number(id));
   }
 
-  @Post(':id/reviews')
-  async addReview(@Param('id') id: string, @Body() createReviewDto: CreateReviewDto) {
-    return this.bookService.addReview(Number(id), createReviewDto);
-  }
 }
