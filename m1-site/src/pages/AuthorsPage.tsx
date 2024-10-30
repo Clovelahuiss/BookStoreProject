@@ -47,7 +47,6 @@ const AuthorsPage: React.FC = () => {
         }
     };
 
-        
     const toggleEditMode = () => setEditMode((prev) => !prev);
 
     const handleEdit = (authorId: number) => {
@@ -100,7 +99,13 @@ const AuthorsPage: React.FC = () => {
 
     return (
         <div className="p-6">
+            {/* Breadcrumb */}
+            <nav className="text-sm text-gray-500 mb-4">
+                <a href="/" className="hover:underline text-blue-600">Accueil</a> {'>'} <span className="text-gray-700">Auteurs</span>
+            </nav>
+
             <h1 className="text-2xl font-bold mb-6">Liste des Auteurs</h1>
+
             <div className="flex gap-4 mb-6">
                 <button 
                     className="bg-blue-600 text-white py-2 px-4 rounded shadow hover:bg-blue-700"
@@ -122,6 +127,7 @@ const AuthorsPage: React.FC = () => {
                     className="flex-grow p-2 border rounded focus:outline-none focus:border-blue-500"
                 />
             </div>
+
             <AddAuthorModal open={openAddModal} onClose={handleCloseAddModal} onAddAuthor={handleAddAuthor} />
             {selectedAuthor && (
                 <EditAuthorModal
