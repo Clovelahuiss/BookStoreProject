@@ -1,4 +1,3 @@
-/*Impossible de fixer la règle prettier/prettier pour le retour à la ligne*/
 import {
   Controller,
   Get,
