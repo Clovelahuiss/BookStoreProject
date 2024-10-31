@@ -9,6 +9,13 @@ export class CreationRepository extends Repository<Creation> {
     super(Creation, dataSource.createEntityManager());
   }
 
+  async findAvailableCreations(): Promise<Creation[]> {
+    return this.createQueryBuilder('creation')
+      .leftJoinAndSelect('creation.author', 'author')
+      .where('author.id IS NULL')
+      .getMany();
+  }
+
   async findOrCreate(nomCreation: string, author?: Author): Promise<Creation> {
     // Vérifiez si nomCreation est défini
     if (!nomCreation) {

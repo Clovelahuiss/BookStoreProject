@@ -11,6 +11,7 @@ import {
 import { AuthorService } from '../service/author.service';
 import { CreateAuthorDto } from '../dto/create-author.dto';
 import { UpdateAuthorDto } from '../dto/update-author.dto';
+import { Author } from '../models/author.entity';
 
 @Controller('authors')
 export class AuthorController {
@@ -29,7 +30,9 @@ export class AuthorController {
     return await this.authorService.findAllWithPagination(limit, offset);
   }
   @Post()
-  async createAuthor(@Body() createAuthorDto: CreateAuthorDto) {
+  async createAuthor(
+    @Body() createAuthorDto: CreateAuthorDto,
+  ): Promise<Author> {
     return this.authorService.createAuthor(createAuthorDto);
   }
 

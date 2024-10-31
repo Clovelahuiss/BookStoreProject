@@ -13,8 +13,13 @@ export class CreationController {
 
   @Post()
   async createCreation(
-    @Body('nomAuteur') nomAuteur: string,
+    @Body('nomCreation') nomCreation: string,
   ): Promise<Creation> {
-    return this.creationRepository.findOrCreate(nomAuteur);
+    return this.creationRepository.findOrCreate(nomCreation);
+  }
+
+  @Get('available')
+  async getAvailableCreations(): Promise<Creation[]> {
+    return this.creationRepository.findAvailableCreations();
   }
 }

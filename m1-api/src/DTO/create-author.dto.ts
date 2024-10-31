@@ -1,8 +1,8 @@
-import { IsString, IsNotEmpty, IsOptional } from 'class-validator';
+// src/dto/create-author.dto.ts
+import { IsString, IsOptional, IsNumber } from 'class-validator';
 
 export class CreateAuthorDto {
   @IsString()
-  @IsNotEmpty()
   name: string;
 
   @IsString()
@@ -13,6 +13,7 @@ export class CreateAuthorDto {
   @IsOptional()
   photo?: string;
 
-  @IsString()
-  nomCreation?: string;
+  @IsNumber()
+  @IsOptional()
+  creationId?: number;
 }

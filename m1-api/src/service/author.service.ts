@@ -49,16 +49,25 @@ export class AuthorService {
   }
 
   async createAuthor(createAuthorDto: CreateAuthorDto): Promise<Author> {
-    const { name, bio, photo, nomCreation } = createAuthorDto;
+    const { name, bio, photo, creationId } = createAuthorDto;
 
-    // Crée l'auteur
-    const author = this.authorRepository.create({ name, bio, photo });
-    await this.authorRepository.save(author);
+    const author = this.authorRepository.create({
+      name,
+      bio,
+      photo,
+    });
 
-    // Associe la création à l'auteur
-    await this.creationRepository.findOrCreate(nomCreation, author);
+    // Si un creationId est fourni, on lie l'auteur à cette création
+    if (creationId) {
+      const creation = await this.creationRepository.findOne({
+        where: { id: creationId },
+      });
+      if (creation) {
+        author.creations = [creation]; // Attribue la création à l'auteur
+      }
+    }
 
-    return author;
+    return this.authorRepository.save(author);
   }
 
   async findAuthorById(id: number): Promise<Author> {
