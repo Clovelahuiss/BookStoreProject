@@ -1,5 +1,7 @@
+// src/components/AddAuthorModal.tsx
+
 import React, { useState, useEffect } from 'react';
-import { Dialog, DialogActions, DialogContent, DialogTitle, TextField, Button, MenuItem, Select, InputLabel, FormControl } from '@mui/material';
+import { Dialog, DialogActions, DialogContent, DialogTitle, TextField, Button, Select, MenuItem } from '@mui/material';
 import { getAvailableCreations, addCreation } from '../services/creationService';
 
 interface AddAuthorModalProps {
@@ -12,44 +14,33 @@ const AddAuthorModal: React.FC<AddAuthorModalProps> = ({ open, onClose, onAddAut
     const [name, setName] = useState('');
     const [bio, setBio] = useState('');
     const [photo, setPhoto] = useState('');
-    const [creationId, setCreationId] = useState<number | 'new' | ''>('');
-    const [availableCreations, setAvailableCreations] = useState<{ id: number; nomCreation: string }[]>([]);
+    const [creationId, setCreationId] = useState<number | 'new' | undefined>(undefined);
     const [newCreationName, setNewCreationName] = useState('');
+    const [availableCreations, setAvailableCreations] = useState<{ id: number; nomCreation: string }[]>([]);
+
+    const fetchAvailableCreations = async () => {
+        try {
+            const creations = await getAvailableCreations();
+            setAvailableCreations(creations);
+        } catch (error) {
+            console.error("Erreur lors de la récupération des créations disponibles :", error);
+        }
+    };
 
     useEffect(() => {
-        const fetchAvailableCreations = async () => {
-            try {
-                const creations = await getAvailableCreations();
-                setAvailableCreations(creations);
-            } catch (error) {
-                console.error("Erreur lors de la récupération des créations disponibles :", error);
-            }
-        };
-
-        fetchAvailableCreations();
-    }, []);
-
-    const handleAdd = async () => {
-        let finalCreationId = creationId as number | undefined;
-
-        // Si "Nouvelle famille" est sélectionnée, créez une nouvelle création
-        if (creationId === 'new' && newCreationName) {
-            try {
-                const newCreation = await addCreation({ nomCreation: newCreationName });
-                finalCreationId = newCreation.id; // Utilisez l'ID de la nouvelle création
-            } catch (error) {
-                console.error("Erreur lors de la création de la nouvelle famille :", error);
-                return; // Arrêtez si la création échoue
-            }
+        if (open) {
+            fetchAvailableCreations();
+            setName('');
+            setBio('');
+            setPhoto('');
+            setCreationId(undefined);
+            setNewCreationName('');
         }
+    }, [open]);
 
-        // Envoie les données pour créer l'auteur, en utilisant l'ID de la création existante ou nouvelle
-        onAddAuthor({
-            name,
-            bio,
-            photo,
-            creationId: finalCreationId,
-        });
+    const handleAdd = () => {
+        onAddAuthor({ name, bio, photo, creationId: creationId === 'new' ? undefined : creationId, newCreationName });
+        fetchAvailableCreations(); // Rafraîchit la liste des créations après ajout d'un auteur
         onClose();
     };
 
@@ -80,26 +71,25 @@ const AddAuthorModal: React.FC<AddAuthorModalProps> = ({ open, onClose, onAddAut
                     fullWidth
                     margin="dense"
                 />
-
-                <FormControl fullWidth margin="dense">
-                    <InputLabel>Famille</InputLabel>
-                    <Select
-                        value={creationId}
-                        onChange={(e) => setCreationId(e.target.value as number | 'new')}
-                        label="Famille"
-                    >
-                        {availableCreations.map((creation) => (
-                            <MenuItem key={creation.id} value={creation.id}>
-                                {creation.nomCreation}
-                            </MenuItem>
-                        ))}
-                        <MenuItem value="new">Nouvelle famille</MenuItem>
-                    </Select>
-                </FormControl>
+                <Select
+                    value={creationId}
+                    onChange={(e) => setCreationId(e.target.value as number | 'new')}
+                    fullWidth
+                    displayEmpty
+                    margin="dense"
+                >
+                    <MenuItem value="" disabled>Choisir une création</MenuItem>
+                    {availableCreations.map((creation) => (
+                        <MenuItem key={creation.id} value={creation.id}>
+                            {creation.nomCreation}
+                        </MenuItem>
+                    ))}
+                    <MenuItem value="new">Nouvelle création</MenuItem>
+                </Select>
 
                 {creationId === 'new' && (
                     <TextField
-                        label="Nom de la nouvelle famille"
+                        label="Nom de la nouvelle création"
                         value={newCreationName}
                         onChange={(e) => setNewCreationName(e.target.value)}
                         fullWidth
@@ -108,12 +98,8 @@ const AddAuthorModal: React.FC<AddAuthorModalProps> = ({ open, onClose, onAddAut
                 )}
             </DialogContent>
             <DialogActions>
-                <Button onClick={onClose} color="secondary">
-                    Annuler
-                </Button>
-                <Button onClick={handleAdd} color="primary" variant="contained">
-                    Valider
-                </Button>
+                <Button onClick={onClose} color="secondary">Annuler</Button>
+                <Button onClick={handleAdd} color="primary" variant="contained">Valider</Button>
             </DialogActions>
         </Dialog>
     );

@@ -7,6 +7,7 @@ import DeleteAuthorModal from '../components/DeleteAuthorModal';
 import AuthorCard from '../components/AuthorCard';
 import { Author } from '../models/Author';
 import { getAuthors, addAuthor, updateAuthor, deleteAuthor } from '../services/authorService';
+import { getAvailableCreations } from '../services/creationService';
 
 const AuthorsPage: React.FC = () => {
     const [authors, setAuthors] = useState<Author[]>([]);
@@ -15,7 +16,7 @@ const AuthorsPage: React.FC = () => {
     const [openDeleteModal, setOpenDeleteModal] = useState(false);
     const [editMode, setEditMode] = useState(false);
     const [selectedAuthor, setSelectedAuthor] = useState<Author | null>(null);
-    const [searchTerm, setSearchTerm] = useState(''); // Champ de recherche
+    const [searchTerm, setSearchTerm] = useState('');
 
     const fetchAuthors = async () => {
         try {
@@ -30,22 +31,32 @@ const AuthorsPage: React.FC = () => {
         fetchAuthors();
     }, []);
 
+    useEffect(() => {
+        if (!openAddModal && !openEditModal && !openDeleteModal) {
+            fetchAuthors();
+        }
+    }, [openAddModal, openEditModal, openDeleteModal]);
+
     const filteredAuthors = authors.filter(author =>
         author.name.toLowerCase().includes(searchTerm.toLowerCase())
     );
 
-    const handleOpenAddModal = () => setOpenAddModal(true);
-    const handleCloseAddModal = () => setOpenAddModal(false);
+    const handleOpenAddModal = () => {
+    setOpenAddModal(true);
+};
 
-    const handleAddAuthor = async (newAuthor: { name: string; bio: string; photo: string }) => {
-        try {
-            const addedAuthor = await addAuthor(newAuthor);
-            setAuthors((prev) => [...prev, addedAuthor]);
-            handleCloseAddModal();
-        } catch (error) {
-            console.error("Erreur lors de l'ajout de l'auteur :", error);
-        }
-    };
+const handleAddAuthor = async (newAuthor: { name: string; bio: string; photo: string; creationId?: number; newCreationName?: string }) => {
+    try {
+        const addedAuthor = await addAuthor(newAuthor);
+        setAuthors((prev) => [...prev, addedAuthor]);
+        setOpenAddModal(false);
+    } catch (error) {
+        console.error("Erreur lors de l'ajout de l'auteur :", error);
+    }
+};
+    
+    
+    
 
     const toggleEditMode = () => setEditMode((prev) => !prev);
 
@@ -57,7 +68,7 @@ const AuthorsPage: React.FC = () => {
         }
     };
 
-    const handleUpdateAuthor = async (updatedAuthor: { name: string; bio: string; photo: string }) => {
+    const handleUpdateAuthor = async (updatedAuthor: { name: string; bio: string; photo: string; nomCreation?: string }) => {
         if (selectedAuthor) {
             try {
                 const editedAuthor = await updateAuthor(selectedAuthor.id, updatedAuthor);
@@ -99,7 +110,6 @@ const AuthorsPage: React.FC = () => {
 
     return (
         <div className="p-6">
-            {/* Breadcrumb */}
             <nav className="text-sm text-gray-500 mb-4">
                 <a href="/" className="hover:underline text-blue-600">Accueil</a> {'>'} <span className="text-gray-700">Auteurs</span>
             </nav>
@@ -128,8 +138,12 @@ const AuthorsPage: React.FC = () => {
                 />
             </div>
 
-            <AddAuthorModal open={openAddModal} onClose={handleCloseAddModal} onAddAuthor={handleAddAuthor} />
-            {selectedAuthor && (
+            <AddAuthorModal 
+                open={openAddModal} 
+                onClose={() => setOpenAddModal(false)} 
+                onAddAuthor={handleAddAuthor}
+            />
+                {selectedAuthor && (
                 <EditAuthorModal
                     open={openEditModal}
                     onClose={() => setOpenEditModal(false)}
@@ -154,7 +168,7 @@ const AuthorsPage: React.FC = () => {
                         editMode={editMode}
                         onEdit={() => handleEdit(author.id)}
                         onDelete={() => handleDelete(author.id)}
-                        averageRating={author.averageRating} // Envoi de la moyenne des notes
+                        averageRating={author.averageRating}
                     />
                 ))}
             </div>
