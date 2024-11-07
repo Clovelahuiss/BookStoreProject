@@ -1,14 +1,9 @@
-// src/app/books/page.tsx
+import '../App.css'; 
 import React from 'react';
-import BooksList from '../components/BooksList'; // Chemin corrigé
+import BooksPage from '../../pages/BooksPage';
 
-const BooksPage = () => {
-    return (
-        <div>
-            <h1>Bienvenue dans la bibliothèque</h1>
-            <BooksList />
-        </div>
-    );
+const BooksRoute: React.FC = () => {
+    return <BooksPage />;
 };
 
-export default BooksPage;
+export default BooksRoute;

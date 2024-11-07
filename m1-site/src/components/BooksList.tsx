@@ -1,59 +1,55 @@
-// src/app/components/BooksList.tsx
-"use client"; // Chemin corrigé
-import React, { useEffect, useState } from 'react';
+"use client";
+import React from 'react';
+import './BooksList.module.css';
 
 interface Book {
     id: number;
     title: string;
+    summary?: string;
+    cover?: string;
     publicationDate: string;
-    author: {
-        id: number;
-        name: string;
-    };
+    averageRating: number;
+    price?: number;
 }
 
+interface BookCardProps {
+    book: Book;
+    onDelete: (bookId: number) => void;
+    onEdit: (book: Book) => void;
+}
 
-const BooksList: React.FC = () => {
-    const [books, setBooks] = useState<Book[]>([]);
-    const [error, setError] = useState<string | null>(null);
-
-    useEffect(() => {
-        const fetchBooks = async () => {
-            try {
-                const response = await fetch('http://localhost:3001/books'); // Assure-toi que l'URL est correcte
-                if (!response.ok) {
-                    throw new Error('Failed to load books');
-                }
-                const data = await response.json();
-                setBooks(data);
-            } catch (error: any) {
-                setError(error.message);
-            }
-        };
-
-        fetchBooks();
-    }, []);
-
-    if (error) {
-        return <div>Failed to load books: {error}</div>;
-    }
-
+const BookCard: React.FC<BookCardProps> = ({ book, onDelete, onEdit }) => {
     return (
-        <div>
-            <h2>Liste des livres</h2>
-            {books.length === 0 ? (
-                <div>Aucun livre trouvé.</div>
-            ) : (
-                <ul>
-                    {books.map((book) => (
-                        <li key={book.id}>
-                            {book.title} (Publié en {book.publicationDate} par {book.author.name})
-                        </li>
-                    ))}
-                </ul>
-            )}
+        <div className="book-card">
+            <img src={book.cover || 'default-cover.png'} alt={book.title} className="book-cover" />
+            <h3>{book.title}</h3>
+            <p>{book.summary || 'Aucun résumé disponible.'}</p>
+            <p>Date de publication : {book.publicationDate}</p>
+            <p>Prix : {book.price ? `${book.price} €` : 'Non spécifié'}</p>
+            <p>Note moyenne : {book.averageRating ? book.averageRating.toFixed(1) : 'N/A'}</p>
+            
+            <div className="action-buttons">
+                <button onClick={() => onEdit(book)}>Modifier</button>
+                <button onClick={() => onDelete(book.id)}>Supprimer</button>
+            </div>
         </div>
     );
 };
 
-export default BooksList;
+interface BookListProps {
+    books: Book[];
+    onDelete: (bookId: number) => void;
+    onEdit: (book: Book) => void;
+}
+
+const BookList: React.FC<BookListProps> = ({ books, onDelete, onEdit }) => {
+    return (
+        <div className="book-list">
+            {books.map((book) => (
+                <BookCard key={book.id} book={book} onDelete={onDelete} onEdit={onEdit} />
+            ))}
+        </div>
+    );
+};
+
+export default BookList;
