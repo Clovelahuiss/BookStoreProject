@@ -8,9 +8,9 @@ import {
   HttpStatus,
   HttpException,
 } from '@nestjs/common';
-import { ReviewService } from '../service/review.service';
-import { CreateReviewDto } from '../dto/create-review.dto';
-import { Review } from '../models/review.entity';
+import { ReviewService } from '../review/review.service';
+import { CreateReviewDto } from '../review/create-review.dto';
+import { Review } from '../review/review.entity';
 
 @Controller('reviews')
 export class ReviewController {

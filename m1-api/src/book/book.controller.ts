@@ -11,10 +11,10 @@ import {
   Delete,
   Query,
 } from '@nestjs/common';
-import { BookService } from '../service/book.service';
-import { BookPresenter } from '../presenter/book.presenter';
-import { CreateBookDto } from '../dto/create-book.dto';
-import { UpdateBookDto } from '../dto/update-book.dto';
+import { BookService } from './book.service';
+import { BookPresenter } from './book.presenter';
+import { CreateBookDto } from './create-book.dto';
+import { UpdateBookDto } from './update-book.dto';
 
 @Controller('books')
 export class BookController {

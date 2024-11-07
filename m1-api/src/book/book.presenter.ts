@@ -1,4 +1,4 @@
-import { Book } from '../models/book.entity';
+import { Book } from './book.entity';
 
 export class BookPresenter {
   id: number;

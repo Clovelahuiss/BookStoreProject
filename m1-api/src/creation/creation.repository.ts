@@ -1,7 +1,7 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { Repository, DataSource } from 'typeorm';
-import { Creation } from '../models/creation.entity';
-import { Author } from '../models/author.entity';
+import { Creation } from '../creation/creation.entity';
+import { Author } from '../author/author.entity';
 
 @Injectable()
 export class CreationRepository extends Repository<Creation> {

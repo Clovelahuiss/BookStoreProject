@@ -5,8 +5,8 @@ import {
   ManyToOne,
   OneToMany,
 } from 'typeorm';
-import { Creation } from './creation.entity';
-import { Review } from './review.entity';
+import { Creation } from '../creation/creation.entity';
+import { Review } from '../review/review.entity';
 
 @Entity()
 export class Book {

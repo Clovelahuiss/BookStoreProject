@@ -1,6 +1,6 @@
 import { Controller, Get, Post, Body } from '@nestjs/common';
-import { CreationRepository } from '../repository/creation.repository';
-import { Creation } from '../models/creation.entity';
+import { CreationRepository } from '../creation/creation.repository';
+import { Creation } from './creation.entity';
 
 @Controller('creations')
 export class CreationController {

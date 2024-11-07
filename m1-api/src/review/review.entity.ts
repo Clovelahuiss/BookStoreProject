@@ -5,7 +5,7 @@ import {
   ManyToOne,
   CreateDateColumn,
 } from 'typeorm';
-import { Book } from './book.entity';
+import { Book } from '../book/book.entity';
 
 @Entity()
 export class Review {

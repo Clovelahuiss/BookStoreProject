@@ -8,10 +8,10 @@ import {
   Put,
   Delete,
 } from '@nestjs/common';
-import { AuthorService } from '../service/author.service';
-import { CreateAuthorDto } from '../dto/create-author.dto';
-import { UpdateAuthorDto } from '../dto/update-author.dto';
-import { Author } from '../models/author.entity';
+import { AuthorService } from './author.service';
+import { CreateAuthorDto } from './create-author.dto';
+import { UpdateAuthorDto } from './update-author.dto';
+import { Author } from './author.entity';
 
 @Controller('authors')
 export class AuthorController {

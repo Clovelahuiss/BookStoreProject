@@ -1,9 +1,9 @@
 import { Injectable, NotFoundException } from '@nestjs/common';
-import { Book } from '../models/book.entity';
-import { BookRepository } from '../repository/book.repository';
-import { CreateBookDto } from '../dto/create-book.dto';
-import { UpdateBookDto } from '../dto/update-book.dto';
-import { CreationRepository } from '../repository/creation.repository';
+import { Book } from './book.entity';
+import { BookRepository } from './book.repository';
+import { CreateBookDto } from './create-book.dto';
+import { UpdateBookDto } from './update-book.dto';
+import { CreationRepository } from '../creation/creation.repository';
 
 @Injectable()
 export class BookService {

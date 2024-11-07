@@ -1,8 +1,8 @@
 import { Module } from '@nestjs/common';
 import { TypeOrmModule } from '@nestjs/typeorm';
-import { Creation } from '../models/creation.entity';
-import { CreationRepository } from '../repository/creation.repository';
-import { CreationController } from '../controller/creation.controller';
+import { Creation } from '../creation/creation.entity';
+import { CreationRepository } from '../creation/creation.repository';
+import { CreationController } from '../creation/creation.controller';
 
 @Module({
   imports: [TypeOrmModule.forFeature([Creation])],
