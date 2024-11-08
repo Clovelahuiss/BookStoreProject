@@ -3,7 +3,7 @@
 import React from 'react';
 import { Card, CardContent, Typography, CardActions, Button, Avatar, Box } from '@mui/material';
 import Link from 'next/link';
-import { Book } from '../models/entité';
+import { Book } from '../models/Book';
 
 interface BookCardProps {
     book: Book;

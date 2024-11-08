@@ -1,4 +1,4 @@
-interface Book {
+export interface Book {
     id: number;
     title: string;
     publicationDate: string;
@@ -7,11 +7,13 @@ interface Book {
     averageRating: number | null;
 }
 
-interface CreationWithBooks {
+export interface CreationWithBooks {
     id: number;
     nomCreation: string;
     books: Book[]; // Liste des livres associés à la création
 }
+
+export type NewBook = Omit<Book, 'id'>;
 
 // Example usage of CreationWithBooks
 const exampleCreation: CreationWithBooks = {
