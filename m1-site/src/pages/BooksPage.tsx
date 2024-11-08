@@ -6,7 +6,7 @@ import EditBookModal from '../components/EditBookModal';
 import DeleteBookModal from '../components/DeleteBookModal';
 import BookCard from '../components/BookCard';
 import { Book } from '../models/Book';
-import { getBooks, addBook, updateBook, deleteBook } from '../services/bookService';
+import { getBooks, createBook, updateBook, deleteBook } from '../services/bookService';
 
 const BooksPage: React.FC = () => {
     const [books, setBooks] = useState<Book[]>([]);
@@ -42,9 +42,18 @@ const BooksPage: React.FC = () => {
 
     const handleOpenAddModal = () => setOpenAddModal(true);
 
-    const handleAddBook = async (newBook: { title: string; authorId: number; genre: string; cover: string }) => {
+    const handleAddBook = async (newBook: { 
+        title: string; 
+        creationId: number;
+        publicationDate: string;
+        summary?: string;
+        price?: number;
+    }) => {
         try {
-            const addedBook = await addBook(newBook);
+            const addedBook = await createBook({
+                ...newBook,
+                averageRating: 0,
+            });
             setBooks((prev) => [...prev, addedBook]);
             setOpenAddModal(false);
         } catch (error) {

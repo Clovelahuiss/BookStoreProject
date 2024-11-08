@@ -7,14 +7,23 @@ import { getAvailableCreations } from '../services/creationService';
 interface AddBookModalProps {
     open: boolean;
     onClose: () => void;
-    onAddBook: (bookData: { title: string; creationId: number; genre: string; cover: string }) => void;
+    onAddBook: (book: {
+        title: string;
+        creationId: number;
+        genre: string;
+        cover: string;
+        publicationDate: string; // Ajout du champ publicationDate
+    }) => void;
 }
+
+// Imports existants...
 
 const AddBookModal: React.FC<AddBookModalProps> = ({ open, onClose, onAddBook }) => {
     const [title, setTitle] = useState('');
     const [genre, setGenre] = useState('');
     const [cover, setCover] = useState('');
     const [creationId, setCreationId] = useState<number | undefined>(undefined);
+    const [publicationDate, setPublicationDate] = useState('');
     const [availableCreations, setAvailableCreations] = useState<{ id: number; nomCreation: string }[]>([]);
 
     const fetchAvailableCreations = async () => {
@@ -33,12 +42,19 @@ const AddBookModal: React.FC<AddBookModalProps> = ({ open, onClose, onAddBook })
             setGenre('');
             setCover('');
             setCreationId(undefined);
+            setPublicationDate('');
         }
     }, [open]);
 
     const handleAdd = () => {
         if (creationId !== undefined) {
-            onAddBook({ title, genre, cover, creationId });
+            onAddBook({
+                title,
+                genre,
+                cover,
+                creationId,
+                publicationDate: publicationDate || new Date().toISOString().split('T')[0]
+            });
             onClose();
         }
     };
@@ -60,6 +76,17 @@ const AddBookModal: React.FC<AddBookModalProps> = ({ open, onClose, onAddBook })
                     onChange={(e) => setGenre(e.target.value)}
                     fullWidth
                     margin="dense"
+                />
+                <TextField
+                    label="Date de publication"
+                    type="date"
+                    value={publicationDate}
+                    onChange={(e) => setPublicationDate(e.target.value)}
+                    fullWidth
+                    margin="dense"
+                    InputLabelProps={{
+                        shrink: true,
+                    }}
                 />
                 <TextField
                     label="URL de la couverture"
@@ -84,8 +111,8 @@ const AddBookModal: React.FC<AddBookModalProps> = ({ open, onClose, onAddBook })
                 </Select>
             </DialogContent>
             <DialogActions>
-                <Button onClick={onClose} color="secondary">Annuler</Button>
-                <Button onClick={handleAdd} color="primary" variant="contained">Valider</Button>
+                <Button onClick={onClose}>Annuler</Button>
+                <Button onClick={handleAdd}>Ajouter</Button>
             </DialogActions>
         </Dialog>
     );
