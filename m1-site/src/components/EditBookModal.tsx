@@ -7,28 +7,37 @@ interface EditBookModalProps {
     open: boolean;
     onClose: () => void;
     book: Book;
-    onUpdateBook: (updatedBook: { title: string; genre: string; cover: string }) => Promise<void>;
+    onUpdateBook: (updatedBook: Partial<Book>) => Promise<void>;
 }
 
-const EditBookModal: React.FC<EditBookModalProps> = ({ open, onClose, book, onUpdateBook }) => {
-    const [title, setTitle] = useState(book.title || '');
-    const [genre, setGenre] = useState(book.genre || '');
-    const [cover, setCover] = useState(book.cover || '');
+const EditBookModal: React.FC<EditBookModalProps> = ({ book, open, onClose, onUpdateBook }) => {
+    const [title, setTitle] = useState(book?.title || '');
+    const [publicationDate, setPublicationDate] = useState(book?.publicationDate || '');
+    const [summary, setSummary] = useState(book?.summary || '');
+    const [price, setPrice] = useState(book?.price?.toString() || '');
 
     useEffect(() => {
-        setTitle(book.title);
-        setGenre(book.genre || '');
-        setCover(book.cover || '');
+        if (book) {
+            setTitle(book.title);
+            setPublicationDate(book.publicationDate);
+            setSummary(book.summary || '');
+            setPrice(book.price?.toString() || '');
+        }
     }, [book]);
 
     const handleSubmit = () => {
-        onUpdateBook({ title, genre, cover });
+        onUpdateBook({
+            title,
+            publicationDate,
+            summary,
+            price: price ? parseFloat(price) : undefined
+        });
         onClose();
     };
 
     return (
         <Dialog open={open} onClose={onClose}>
-            <DialogTitle>Modifier le Livre</DialogTitle>
+            <DialogTitle>Modifier le livre</DialogTitle>
             <DialogContent>
                 <TextField
                     label="Titre"
@@ -38,25 +47,35 @@ const EditBookModal: React.FC<EditBookModalProps> = ({ open, onClose, book, onUp
                     margin="dense"
                 />
                 <TextField
-                    label="Genre"
-                    value={genre}
-                    onChange={(e) => setGenre(e.target.value)}
+                    label="Date de publication"
+                    type="date"
+                    value={publicationDate}
+                    onChange={(e) => setPublicationDate(e.target.value)}
                     fullWidth
+                    margin="dense"
+                    InputLabelProps={{ shrink: true }}
+                />
+                <TextField
+                    label="Résumé"
+                    value={summary}
+                    onChange={(e) => setSummary(e.target.value)}
+                    fullWidth
+                    multiline
+                    rows={4}
                     margin="dense"
                 />
                 <TextField
-                    label="URL de la couverture"
-                    value={cover}
-                    onChange={(e) => setCover(e.target.value)}
+                    label="Prix"
+                    type="number"
+                    value={price}
+                    onChange={(e) => setPrice(e.target.value)}
                     fullWidth
                     margin="dense"
                 />
             </DialogContent>
             <DialogActions>
-                <Button onClick={onClose} color="primary">
-                    Annuler
-                </Button>
-                <Button onClick={handleSubmit} color="primary" variant="contained">
+                <Button onClick={onClose}>Annuler</Button>
+                <Button onClick={handleSubmit} variant="contained" color="primary">
                     Enregistrer
                 </Button>
             </DialogActions>

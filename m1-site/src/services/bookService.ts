@@ -48,15 +48,20 @@ export const createBook = async (bookData: Omit<Book, 'id'>): Promise<Book> => {
     }
 };
 
-// Mettre à jour un livre
-export const updateBook = async (id: number, bookData: Partial<Book>): Promise<Book> => {
-    try {
-        const response = await axios.put<Book>(`${BASE_URL}/${id}`, bookData);
-        return response.data;
-    } catch (error) {
-        console.error(`Erreur lors de la mise à jour du livre ${id}:`, error);
+export const updateBook = async (id: number, updatedBook: Partial<Book>): Promise<Book> => {
+    const response = await fetch(`http://localhost:3001/books/${id}`, {
+        method: 'PUT',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(updatedBook),
+    });
+
+    if (!response.ok) {
         throw new Error('Erreur lors de la mise à jour du livre');
     }
+
+    return await response.json();
 };
 
 // Supprimer un livre

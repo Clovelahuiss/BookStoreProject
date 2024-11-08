@@ -71,13 +71,15 @@ const BooksPage: React.FC = () => {
         }
     };
 
-    const handleUpdateBook = async (updatedBook: { title: string; genre: string; cover: string }) => {
+    const handleUpdateBook = async (updatedBook: Partial<Book>) => {
         if (selectedBook) {
             try {
                 const editedBook = await updateBook(selectedBook.id, updatedBook);
-                setBooks((prevBooks) =>
-                    prevBooks.map((book) =>
-                        book.id === selectedBook.id ? editedBook : book
+                setBooks(prevBooks => 
+                    prevBooks.map(book => 
+                        book.id === selectedBook.id 
+                            ? {...book, ...editedBook}
+                            : book
                     )
                 );
                 setSelectedBook(null);
