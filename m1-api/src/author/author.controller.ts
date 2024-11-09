@@ -1,13 +1,4 @@
-import {
-  Controller,
-  Get,
-  Post,
-  Body,
-  Param,
-  Query,
-  Put,
-  Delete,
-} from '@nestjs/common';
+import { Controller, Get, Post, Body, Param, Query, Put, Delete } from '@nestjs/common';
 import { AuthorService } from './author.service';
 import { CreateAuthorDto } from './create-author.dto';
 import { UpdateAuthorDto } from './update-author.dto';
@@ -29,10 +20,9 @@ export class AuthorController {
   ) {
     return await this.authorService.findAllWithPagination(limit, offset);
   }
+
   @Post()
-  async createAuthor(
-    @Body() createAuthorDto: CreateAuthorDto,
-  ): Promise<Author> {
+  async createAuthor(@Body() createAuthorDto: CreateAuthorDto): Promise<Author> {
     return this.authorService.createAuthor(createAuthorDto);
   }
 
@@ -42,10 +32,7 @@ export class AuthorController {
   }
 
   @Put(':id')
-  async updateAuthor(
-    @Param('id') id: string,
-    @Body() updateAuthorDto: UpdateAuthorDto,
-  ) {
+  async updateAuthor(@Param('id') id: string, @Body() updateAuthorDto: UpdateAuthorDto) {
     return this.authorService.updateAuthor(Number(id), updateAuthorDto);
   }
 
