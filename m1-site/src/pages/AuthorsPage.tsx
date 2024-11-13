@@ -1,112 +1,77 @@
-// src/pages/AuthorsPage.tsx
 'use client';
 import React, { useState, useEffect } from 'react';
-import AddAuthorModal from '../components/AddAuthorModal';
-import EditAuthorModal from '../components/EditAuthorModal';
-import DeleteAuthorModal from '../components/DeleteAuthorModal';
-import AuthorCard from '../components/AuthorCard';
+import AddModal from '../components/AddModal';
+import EditModal from '../components/EditModal';
+import DeleteConfirmationModal from '../components/DeleteConfirmationModal';
+import Card from '../components/Card';
 import { Author } from '../models/Author';
 import { getAuthors, addAuthor, updateAuthor, deleteAuthor } from '../services/authorService';
-import { getAvailableCreations } from '../services/creationService';
 
 const AuthorsPage: React.FC = () => {
     const [authors, setAuthors] = useState<Author[]>([]);
-    const [openAddModal, setOpenAddModal] = useState(false);
-    const [openEditModal, setOpenEditModal] = useState(false);
-    const [openDeleteModal, setOpenDeleteModal] = useState(false);
-    const [editMode, setEditMode] = useState(false);
+    const [modalType, setModalType] = useState<'add' | 'edit' | 'delete' | null>(null);
     const [selectedAuthor, setSelectedAuthor] = useState<Author | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
+    const [editMode, setEditMode] = useState(false);
 
-    const fetchAuthors = async () => {
-        try {
-            const authorsList = await getAuthors();
-            setAuthors(authorsList);
-        } catch (error) {
-            console.error("Erreur lors de la récupération des auteurs :", error);
-        }
-    };
-
+    // Fetch authors on component mount
     useEffect(() => {
-        fetchAuthors();
-    }, []);
-
-    useEffect(() => {
-        if (!openAddModal && !openEditModal && !openDeleteModal) {
-            fetchAuthors();
-        }
-    }, [openAddModal, openEditModal, openDeleteModal]);
-
-    const filteredAuthors = authors.filter(author =>
-        author.name.toLowerCase().includes(searchTerm.toLowerCase())
-    );
-
-    const handleOpenAddModal = () => {
-    setOpenAddModal(true);
-};
-
-const handleAddAuthor = async (newAuthor: { name: string; bio: string; photo: string; creationId?: number; newCreationName?: string }) => {
-    try {
-        const addedAuthor = await addAuthor(newAuthor);
-        setAuthors((prev) => [...prev, addedAuthor]);
-        setOpenAddModal(false);
-    } catch (error) {
-        console.error("Erreur lors de l'ajout de l'auteur :", error);
-    }
-};
-    
-    
-    
-
-    const toggleEditMode = () => setEditMode((prev) => !prev);
-
-    const handleEdit = (authorId: number) => {
-        const authorToEdit = authors.find((author) => author.id === authorId);
-        if (authorToEdit) {
-            setSelectedAuthor(authorToEdit);
-            setOpenEditModal(true);
-        }
-    };
-
-    const handleUpdateAuthor = async (updatedAuthor: { name: string; bio: string; photo: string; nomCreation?: string }) => {
-        if (selectedAuthor) {
+        const fetchAuthors = async () => {
             try {
-                const editedAuthor = await updateAuthor(selectedAuthor.id, updatedAuthor);
-                setAuthors((prevAuthors) =>
-                    prevAuthors.map((author) =>
-                        author.id === selectedAuthor.id ? editedAuthor : author
-                    )
-                );
-                setSelectedAuthor(null);
-                setOpenEditModal(false);
+                const authorsList = await getAuthors();
+                setAuthors(authorsList);
             } catch (error) {
-                console.error("Erreur lors de la mise à jour de l'auteur :", error);
+                console.error("Erreur lors de la récupération des auteurs :", error);
             }
+        };
+        fetchAuthors();
+    }, [modalType]);
+
+    const handleModalOpen = (type: 'add' | 'edit' | 'delete', author?: Author) => {
+        setSelectedAuthor(author || null);
+        setModalType(type);
+    };
+
+    const handleModalClose = () => {
+        setSelectedAuthor(null);
+        setModalType(null);
+    };
+
+    const handleAddAuthor = async (newAuthorData: Omit<Author, 'id'>) => {
+        try {
+            const newAuthor = await addAuthor(newAuthorData);
+            setAuthors([...authors, newAuthor]);
+            handleModalClose();
+        } catch (error) {
+            console.error("Erreur lors de l'ajout de l'auteur :", error);
         }
     };
 
-    const handleDelete = (authorId: number) => {
-        const authorToDelete = authors.find((author) => author.id === authorId);
-        if (authorToDelete) {
-            setSelectedAuthor(authorToDelete);
-            setOpenDeleteModal(true);
+    const handleUpdateAuthor = async (updatedAuthorData: Partial<Author>) => {
+        if (!selectedAuthor) return;
+        try {
+            const updatedAuthor = await updateAuthor(selectedAuthor.id, updatedAuthorData);
+            setAuthors(authors.map((author) => (author.id === selectedAuthor.id ? updatedAuthor : author)));
+            handleModalClose();
+        } catch (error) {
+            console.error("Erreur lors de la mise à jour de l'auteur :", error);
         }
     };
 
     const handleConfirmDelete = async () => {
-        if (selectedAuthor) {
-            try {
-                await deleteAuthor(selectedAuthor.id);
-                setAuthors((prevAuthors) =>
-                    prevAuthors.filter((author) => author.id !== selectedAuthor.id)
-                );
-                setSelectedAuthor(null);
-                setOpenDeleteModal(false);
-            } catch (error) {
-                console.error("Erreur lors de la suppression de l'auteur :", error);
-            }
+        if (!selectedAuthor) return;
+        try {
+            await deleteAuthor(selectedAuthor.id);
+            setAuthors(authors.filter((author) => author.id !== selectedAuthor.id));
+            handleModalClose();
+        } catch (error) {
+            console.error("Erreur lors de la suppression de l'auteur :", error);
         }
     };
+
+    const filteredAuthors = authors.filter((author) =>
+        author.name.toLowerCase().includes(searchTerm.toLowerCase())
+    );
 
     return (
         <div className="p-6">
@@ -117,15 +82,15 @@ const handleAddAuthor = async (newAuthor: { name: string; bio: string; photo: st
             <h1 className="text-2xl font-bold mb-6">Liste des Auteurs</h1>
 
             <div className="flex gap-4 mb-6">
-                <button 
+                <button
                     className="bg-blue-600 text-white py-2 px-4 rounded shadow hover:bg-blue-700"
-                    onClick={handleOpenAddModal}
+                    onClick={() => handleModalOpen('add')}
                 >
                     Ajouter un Auteur
                 </button>
-                <button 
+                <button
                     className={`py-2 px-4 rounded shadow ${editMode ? 'bg-gray-600 text-white' : 'bg-white text-gray-700 border'} hover:bg-gray-700 hover:text-white`}
-                    onClick={toggleEditMode}
+                    onClick={() => setEditMode(!editMode)}
                 >
                     {editMode ? "Terminer" : "Modifier"}
                 </button>
@@ -138,37 +103,45 @@ const handleAddAuthor = async (newAuthor: { name: string; bio: string; photo: st
                 />
             </div>
 
-            <AddAuthorModal 
-                open={openAddModal} 
-                onClose={() => setOpenAddModal(false)} 
-                onAddAuthor={handleAddAuthor}
-            />
-                {selectedAuthor && (
-                <EditAuthorModal
-                    open={openEditModal}
-                    onClose={() => setOpenEditModal(false)}
-                    onUpdateAuthor={handleUpdateAuthor}
-                    author={selectedAuthor}
+            {modalType === 'add' && (
+                <AddModal
+                    open={modalType === 'add'}
+                    onClose={handleModalClose}
+                    onAddEntity={handleAddAuthor}
+                    entityType="author"
                 />
             )}
-            {selectedAuthor && (
-                <DeleteAuthorModal
-                    open={openDeleteModal}
-                    onClose={() => setOpenDeleteModal(false)}
+            {modalType === 'edit' && selectedAuthor && (
+                    <EditModal<Author>
+                    open={modalType === 'edit'}
+                    onClose={handleModalClose}
+                    entityType="author"
+                    entity={selectedAuthor}
+                    onUpdateEntity={handleUpdateAuthor}
+                />
+                
+                )}
+
+            {modalType === 'delete' && selectedAuthor && (
+                <DeleteConfirmationModal
+                    open={modalType === 'delete'}
+                    onClose={handleModalClose}
                     onConfirmDelete={handleConfirmDelete}
-                    authorName={selectedAuthor.name}
+                    itemName={selectedAuthor.name}
+                    entityType="auteur"
                 />
             )}
-            
+
             <div className="grid grid-cols-1 gap-4 mt-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                 {filteredAuthors.map((author) => (
-                    <AuthorCard
+                    <Card
                         key={author.id}
-                        author={author}
+                        item={author}
                         editMode={editMode}
-                        onEdit={() => handleEdit(author.id)}
-                        onDelete={() => handleDelete(author.id)}
+                        onEdit={() => handleModalOpen('edit', author)}
+                        onDelete={() => handleModalOpen('delete', author)}
                         averageRating={author.averageRating}
+                        type="author"
                     />
                 ))}
             </div>

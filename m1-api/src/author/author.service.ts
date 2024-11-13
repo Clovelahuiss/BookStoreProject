@@ -71,4 +71,38 @@ export class AuthorService {
     const author = await this.findAuthorById(id);
     await this.authorRepository.remove(author);
   }
+
+  async findAllWithPagination(limit: number, offset: number, search?: string) {
+    const query = this.authorRepository
+      .createQueryBuilder('author')
+      .leftJoinAndSelect('author.creations', 'creation')
+      .leftJoinAndSelect('creation.books', 'book');
+
+    if (search) {
+      query.where('author.name LIKE :search', { search: `%${search}%` });
+    }
+
+    // Utilisation de la pagination
+    const [authors, total] = await query
+      .skip(offset)
+      .take(limit)
+      .getManyAndCount();
+
+    // Calcul des informations supplémentaires pour chaque auteur
+    const authorsWithDetails = authors.map((author) => {
+      const books = author.creations.flatMap(
+        (creation) => creation.books || [],
+      );
+      const averageRating = books.length
+        ? books.reduce((sum, book) => sum + (book.averageRating || 0), 0) /
+          books.length
+        : null;
+      return { ...author, bookCount: books.length, averageRating };
+    });
+
+    return {
+      authors: authorsWithDetails,
+      total,
+    };
+  }
 }

@@ -1,135 +1,73 @@
-"use client";
-
-import * as React from 'react';
-import AppBar from '@mui/material/AppBar';
-import Box from '@mui/material/Box';
-import Toolbar from '@mui/material/Toolbar';
-import IconButton from '@mui/material/IconButton';
-import Typography from '@mui/material/Typography';
-import Menu from '@mui/material/Menu';
-import MenuIcon from '@mui/icons-material/Menu';
-import Container from '@mui/material/Container';
-import Button from '@mui/material/Button';
-import Tooltip from '@mui/material/Tooltip';
-import MenuItem from '@mui/material/MenuItem';
+'use client'
+import React, { useState } from 'react';
 import Link from 'next/link';
+import { MenuIcon, XIcon } from '@heroicons/react/outline';
 
 const pages = [
   { name: 'Livres', path: '/books' },
   { name: 'Auteurs', path: '/authors' }
 ];
 
-function ResponsiveAppBar() {
-  const [anchorElNav, setAnchorElNav] = React.useState<null | HTMLElement>(null);
+const ResponsiveAppBar: React.FC = () => {
+  const [isNavOpen, setIsNavOpen] = useState(false);
 
-  const handleOpenNavMenu = (event: React.MouseEvent<HTMLElement>) => {
-    setAnchorElNav(event.currentTarget);
-  };
-
-  const handleCloseNavMenu = () => {
-    setAnchorElNav(null);
+  const handleToggleNav = () => {
+    setIsNavOpen((prev) => !prev);
   };
 
   return (
-    <AppBar position="static">
-      <Container maxWidth="xl">
-        <Toolbar disableGutters>
-          <Link href="/" passHref style={{ textDecoration: 'none' }}>
-            <IconButton edge="start" color="inherit" aria-label="home">
-              <img src="/logo_library.png" alt="Logo" style={{ width: '40px', height: '40px' }} />
-            </IconButton>
+    <nav className="bg-blue-600 text-white shadow-md">
+      <div className="container mx-auto px-4 py-3 flex justify-between items-center">
+        
+        {/* Logo and title */}
+        <div className="flex items-center">
+          <Link href="/" passHref>
+            <button className="flex items-center space-x-2" onClick={() => window.location.href = '/'}>
+              <img src="/logo_library.png" alt="Logo" className="w-10 h-10" />
+              <span className="text-2xl font-semibold hidden md:block">BookApp</span>
+            </button>
           </Link>
-          <Typography
-            variant="h6"
-            noWrap
-            sx={{
-              mr: 2,
-              ml: 1,
-              display: { xs: 'none', md: 'flex' },
-              fontFamily: 'monospace',
-              fontWeight: 700,
-              letterSpacing: '.3rem',
-              color: 'inherit',
-              textDecoration: 'none',
-            }}
-          >
-            <Link href="/" passHref style={{ color: 'inherit', textDecoration: 'none' }}>
-              BookApp
+        </div>
+        
+        {/* Desktop Navigation Links */}
+        <div className="hidden md:flex space-x-4">
+          {pages.map((page) => (
+            <Link key={page.name} href={page.path}>
+              <button className="hover:bg-blue-700 px-3 py-2 rounded transition">{page.name}</button>
             </Link>
-          </Typography>
+          ))}
+        </div>
 
-          <Box sx={{ flexGrow: 1, display: { xs: 'flex', md: 'none' } }}>
-            <IconButton
-              size="large"
-              aria-label="open navigation menu"
-              aria-controls="menu-appbar"
-              aria-haspopup="true"
-              onClick={handleOpenNavMenu}
-              color="inherit"
-            >
-              <MenuIcon />
-            </IconButton>
-            <Menu
-              id="menu-appbar"
-              anchorEl={anchorElNav}
-              anchorOrigin={{
-                vertical: 'bottom',
-                horizontal: 'left',
-              }}
-              keepMounted
-              transformOrigin={{
-                vertical: 'top',
-                horizontal: 'left',
-              }}
-              open={Boolean(anchorElNav)}
-              onClose={handleCloseNavMenu}
-              sx={{ display: { xs: 'block', md: 'none' } }}
-            >
-              {pages.map((page) => (
-                <MenuItem key={page.name} onClick={handleCloseNavMenu}>
-                  <Link href={page.path} passHref style={{ textDecoration: 'none', color: 'inherit' }}>
-                    <Typography sx={{ textAlign: 'center' }}>{page.name}</Typography>
-                  </Link>
-                </MenuItem>
-              ))}
-            </Menu>
-          </Box>
+        {/* Mobile menu toggle button */}
+        <button onClick={handleToggleNav} className="md:hidden">
+          {isNavOpen ? (
+            <XIcon className="w-6 h-6" />
+          ) : (
+            <MenuIcon className="w-6 h-6" />
+          )}
+        </button>
+      </div>
 
-          <Typography
-            variant="h5"
-            noWrap
-            sx={{
-              mr: 2,
-              display: { xs: 'flex', md: 'none' },
-              flexGrow: 1,
-              fontFamily: 'monospace',
-              fontWeight: 700,
-              letterSpacing: '.3rem',
-              color: 'inherit',
-              textDecoration: 'none',
-            }}
-          >
-            <Link href="/" passHref style={{ color: 'inherit', textDecoration: 'none' }}>
-              BookApp
+      {/* Mobile Navigation Links */}
+      {isNavOpen && (
+        <div className="md:hidden bg-blue-700 space-y-1 pb-3">
+          {pages.map((page) => (
+            <Link key={page.name} href={page.path}>
+              <button
+                className="block w-full text-left px-4 py-2 text-white hover:bg-blue-800 transition"
+                onClick={() => {
+                  setIsNavOpen(false);
+                  window.location.href = page.path;
+                }}
+              >
+                {page.name}
+              </button>
             </Link>
-          </Typography>
-
-          <Box sx={{ flexGrow: 1, display: { xs: 'none', md: 'flex' } }}>
-            {pages.map((page) => (
-              <Link key={page.name} href={page.path} passHref style={{ textDecoration: 'none' }}>
-                <Button
-                  onClick={handleCloseNavMenu}
-                  sx={{ my: 2, color: 'white', display: 'block' }}
-                >
-                  {page.name}
-                </Button>
-              </Link>
-            ))}
-          </Box>
-        </Toolbar>
-      </Container>
-    </AppBar>
+          ))}
+        </div>
+      )}
+    </nav>
   );
-}
+};
 
 export default ResponsiveAppBar;

@@ -1,50 +1,76 @@
-// src/pages/BooksPage.tsx
-
 'use client';
 import React, { useState, useEffect } from 'react';
-import AddBookModal from '../components/AddBookModal';
-import EditBookModal from '../components/EditBookModal';
-import DeleteBookModal from '../components/DeleteBookModal';
-import BookCard from '../components/BookCard';
+import AddModal from '../components/AddModal';
+import EditModal from '../components/EditModal';
+import DeleteConfirmationModal from '../components/DeleteConfirmationModal';
+import Card from '../components/Card';
 import { Book } from '../models/Book';
 import { getBooks, createBook, updateBook, deleteBook } from '../services/bookService';
 
 const BooksPage: React.FC = () => {
     const [books, setBooks] = useState<Book[]>([]);
-    const [sortCriteria, setSortCriteria] = useState<'note' | 'author' | 'title' | 'price' | 'date'>('note');
-    const [sortOrder, setSortOrder] = useState<string>('desc');
-    const [openAddModal, setOpenAddModal] = useState(false);
-    const [openEditModal, setOpenEditModal] = useState(false);
-    const [openDeleteModal, setOpenDeleteModal] = useState(false);
-    const [editMode, setEditMode] = useState(false);
+    const [modalType, setModalType] = useState<'add' | 'edit' | 'delete' | null>(null);
     const [selectedBook, setSelectedBook] = useState<Book | null>(null);
     const [searchTerm, setSearchTerm] = useState('');
+    const [editMode, setEditMode] = useState(false);
+    const [sortCriteria, setSortCriteria] = useState<'note' | 'author' | 'title' | 'price' | 'date'>('note');
+    const [sortOrder, setSortOrder] = useState<'asc' | 'desc'>('desc');
 
-    const fetchBooks = async () => {
-        try {
-            const booksList = await getBooks();
-            setBooks(booksList);
-        } catch (error) {
-            console.error("Erreur lors de la récupération des livres :", error);
-        }
-    };
-
+    // Fetch books on component mount
     useEffect(() => {
+        const fetchBooks = async () => {
+            try {
+                const booksList = await getBooks();
+                setBooks(booksList);
+            } catch (error) {
+                console.error("Erreur lors de la récupération des livres :", error);
+            }
+        };
         fetchBooks();
-    }, []);
+    }, [modalType]);
 
-    useEffect(() => {
-        if (!openAddModal && !openEditModal && !openDeleteModal) {
-            fetchBooks();
-        }
-    }, [openAddModal, openEditModal, openDeleteModal]);
-
-    const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        setSortCriteria(e.target.value as 'note' | 'author' | 'title' | 'price' | 'date');
+    const handleModalOpen = (type: 'add' | 'edit' | 'delete', book?: Book) => {
+        setSelectedBook(book || null);
+        setModalType(type);
     };
 
-    const handleOrderChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
-        setSortOrder(e.target.value);
+    const handleModalClose = () => {
+        setSelectedBook(null);
+        setModalType(null);
+    };
+
+    const handleAddBook = async (newBook: { title: string; creationId: number; publicationDate: string; summary?: string; price?: number; coverImageUrl?: string }) => {
+        try {
+            const addedBook = await createBook(newBook);
+            setBooks([...books, addedBook]);
+            handleModalClose();
+        } catch (error) {
+            console.error("Erreur lors de l'ajout du livre :", error);
+        }
+    };
+
+    const handleUpdateBook = async (updatedBook: Partial<Book>) => {
+        if (selectedBook) {
+            try {
+                const editedBook = await updateBook(selectedBook.id, updatedBook);
+                setBooks(books.map((book) => (book.id === selectedBook.id ? editedBook : book)));
+                handleModalClose();
+            } catch (error) {
+                console.error("Erreur lors de la mise à jour du livre :", error);
+            }
+        }
+    };
+
+    const handleConfirmDelete = async () => {
+        if (selectedBook) {
+            try {
+                await deleteBook(selectedBook.id);
+                setBooks(books.filter((book) => book.id !== selectedBook.id));
+                handleModalClose();
+            } catch (error) {
+                console.error("Erreur lors de la suppression du livre :", error);
+            }
+        }
     };
 
     const sortedBooks = [...books]
@@ -57,83 +83,9 @@ const BooksPage: React.FC = () => {
                 price: (a.price ?? 0) - (b.price ?? 0),
                 date: new Date(a.publicationDate).getTime() - new Date(b.publicationDate).getTime(),
             };
-            let result = criteria[sortCriteria as keyof typeof criteria];
+            const result = criteria[sortCriteria];
             return sortOrder === 'asc' ? result : -result;
         });
-
-    const handleOpenAddModal = () => setOpenAddModal(true);
-
-    const handleAddBook = async (newBook: { 
-        title: string; 
-        creationId: number;
-        publicationDate: string;
-        summary?: string;
-        price?: number;
-        coverImageUrl?: string;
-    }) => {
-        try {
-            const addedBook = await createBook({
-                ...newBook,
-                creationId: newBook.creationId,
-            });
-            setBooks((prev) => [...prev, addedBook]);
-            setOpenAddModal(false);
-        } catch (error) {
-            console.error("Erreur lors de l'ajout du livre :", error);
-        }
-    };
-
-    const toggleEditMode = () => setEditMode((prev) => !prev);
-
-    const handleEdit = (bookId: number) => {
-        const bookToEdit = books.find((book) => book.id === bookId);
-        if (bookToEdit) {
-            setSelectedBook(bookToEdit);
-            setOpenEditModal(true);
-        }
-    };
-
-    const handleUpdateBook = async (updatedBook: Partial<Book>) => {
-        if (selectedBook) {
-            try {
-                const editedBook = await updateBook(selectedBook.id, updatedBook);
-                setBooks(prevBooks => 
-                    prevBooks.map(book => 
-                        book.id === selectedBook.id 
-                            ? {...book, ...editedBook}
-                            : book
-                    )
-                );
-                setSelectedBook(null);
-                setOpenEditModal(false);
-            } catch (error) {
-                console.error("Erreur lors de la mise à jour du livre :", error);
-            }
-        }
-    };
-
-    const handleDelete = (bookId: number) => {
-        const bookToDelete = books.find((book) => book.id === bookId);
-        if (bookToDelete) {
-            setSelectedBook(bookToDelete);
-            setOpenDeleteModal(true);
-        }
-    };
-
-    const handleConfirmDelete = async () => {
-        if (selectedBook) {
-            try {
-                await deleteBook(selectedBook.id);
-                setBooks((prevBooks) =>
-                    prevBooks.filter((book) => book.id !== selectedBook.id)
-                );
-                setSelectedBook(null);
-                setOpenDeleteModal(false);
-            } catch (error) {
-                console.error("Erreur lors de la suppression du livre :", error);
-            }
-        }
-    };
 
     return (
         <div className="p-6">
@@ -144,16 +96,10 @@ const BooksPage: React.FC = () => {
             <h1 className="text-2xl font-bold mb-6">Liste des Livres</h1>
 
             <div className="flex gap-4 mb-6">
-                <button 
-                    className="bg-blue-600 text-white py-2 px-4 rounded shadow hover:bg-blue-700"
-                    onClick={handleOpenAddModal}
-                >
+                <button className="bg-blue-600 text-white py-2 px-4 rounded shadow hover:bg-blue-700" onClick={() => handleModalOpen('add')}>
                     Ajouter un Livre
                 </button>
-                <button 
-                    className={`py-2 px-4 rounded shadow ${editMode ? 'bg-gray-600 text-white' : 'bg-white text-gray-700 border'} hover:bg-gray-700 hover:text-white`}
-                    onClick={toggleEditMode}
-                >
+                <button className={`py-2 px-4 rounded shadow ${editMode ? 'bg-gray-600 text-white' : 'bg-white text-gray-700 border'} hover:bg-gray-700 hover:text-white`} onClick={() => setEditMode(!editMode)}>
                     {editMode ? "Terminer" : "Modifier"}
                 </button>
                 <input
@@ -168,12 +114,7 @@ const BooksPage: React.FC = () => {
             <div className="flex gap-4 mb-6">
                 <div>
                     <label htmlFor="sortCriteria" className="block text-gray-700">Trier par :</label>
-                    <select
-                        id="sortCriteria"
-                        value={sortCriteria}
-                        onChange={handleSortChange}
-                        className="p-2 border rounded"
-                    >
+                    <select id="sortCriteria" value={sortCriteria} onChange={(e) => setSortCriteria(e.target.value as 'note' | 'author' | 'title' | 'price' | 'date')} className="p-2 border rounded">
                         <option value="note">Note</option>
                         <option value="author">Auteur</option>
                         <option value="title">Nom</option>
@@ -181,53 +122,42 @@ const BooksPage: React.FC = () => {
                         <option value="date">Date de publication</option>
                     </select>
                 </div>
-
                 <div>
                     <label htmlFor="sortOrder" className="block text-gray-700">Ordre :</label>
-                    <select
-                        id="sortOrder"
-                        value={sortOrder}
-                        onChange={handleOrderChange}
-                        className="p-2 border rounded"
-                    >
+                    <select id="sortOrder" value={sortOrder} onChange={(e) => setSortOrder(e.target.value as 'asc' | 'desc')} className="p-2 border rounded">
                         <option value="asc">Croissant</option>
                         <option value="desc">Décroissant</option>
                     </select>
                 </div>
             </div>
 
-            <AddBookModal 
-                open={openAddModal} 
-                onClose={() => setOpenAddModal(false)} 
-                onAddBook={handleAddBook}
-            />
-            {selectedBook && (
-                <EditBookModal
-                    open={openEditModal}
-                    onClose={() => setOpenEditModal(false)}
-                    onUpdateBook={handleUpdateBook}
-                    book={selectedBook}
+            {modalType === 'add' && (
+                <AddModal open={modalType === 'add'} onClose={handleModalClose} onAddEntity={handleAddBook} entityType='book' />
+            )}
+            {modalType === 'edit' && selectedBook && (
+                <EditModal<Book>
+                    open={modalType === 'edit'}
+                    onClose={handleModalClose}
+                    entityType="book"
+                    entity={selectedBook}
+                    onUpdateEntity={handleUpdateBook}
                 />
             )}
-            {selectedBook && (
-                <DeleteBookModal
-                    open={openDeleteModal}
-                    onClose={() => setOpenDeleteModal(false)}
-                    onConfirmDelete={handleConfirmDelete}
-                    bookTitle={selectedBook.title}
-                />
+            {modalType === 'delete' && selectedBook && (
+                <DeleteConfirmationModal open={modalType === 'delete'} onClose={handleModalClose} onConfirmDelete={handleConfirmDelete} itemName={selectedBook.title} entityType="livre" />
             )}
-            
+
             <div className="grid grid-cols-1 gap-4 mt-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                 {sortedBooks.map((book) => (
-                    <BookCard
+                    <Card
                         key={book.id}
-                        book={book}
+                        item={book}
                         editMode={editMode}
-                        onEdit={() => handleEdit(book.id)}
-                        onDelete={() => handleDelete(book.id)}
-                    />
-                ))}
+                        onEdit={() => handleModalOpen('edit', book)}
+                        onDelete={() => handleModalOpen('delete', book)}
+                        averageRating={book.averageRating}
+                        type="book"
+                    />                ))}
             </div>
         </div>
     );

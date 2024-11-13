@@ -1,7 +1,7 @@
 import React from 'react';
 import { BrowserRouter as Router, Route, Routes } from 'react-router-dom';
 import ResponsiveAppBar from './components/AppBar';
-import Home from './pages/HomePage';
+import Home from './app/page';
 import Books from './pages/BooksPage';
 import Authors from './pages/AuthorsPage';
 

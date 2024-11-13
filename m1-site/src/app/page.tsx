@@ -4,8 +4,9 @@ import { Book } from '../models/Book';
 import { Author } from '../models/Author';
 import { getBooks } from '../services/bookService';
 import { getAuthors } from '../services/authorService';
-import BookCard from '../components/BookCard';
+import Card from '../components/Card';
 import Link from 'next/link';
+import './App.css'
 
 const HomePage: React.FC = () => {
   const [topBooks, setTopBooks] = useState<Book[]>([]);
@@ -49,13 +50,15 @@ const HomePage: React.FC = () => {
         <h2 className="text-2xl font-semibold mb-4 text-center">Livres les mieux notés</h2>
         <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-6">
           {topBooks.map((book) => (
-            <BookCard
-              key={book.id}
-              book={book}
-              editMode={false}
-              onEdit={() => {}}
-              onDelete={() => {}}
-            />
+            <Card
+            key={book.id}
+            item={book}
+            averageRating={book.averageRating}
+            type="book"
+            editMode={false}
+            onEdit={() => {}}
+            onDelete={() => {}}
+        />   
           ))}
         </div>
       </section>
