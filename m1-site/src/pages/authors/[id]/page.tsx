@@ -5,11 +5,14 @@ import React, { useEffect, useState, useRef } from 'react';
 import Link from 'next/link';
 import { useParams } from 'next/navigation';
 import { getAuthorById, updateAuthor } from '../../../services/authorService';
+import { updateBook, deleteBook } from '../../../services/bookService';
 import { PencilIcon } from '@heroicons/react/solid';
 import PhotoUrlModal from '../../../components/PhotoUrlModal';
+import EditModal from '../../../components/EditModal';
+import DeleteConfirmationModal from '../../../components/DeleteConfirmationModal';
 import { AuthorWithCreations } from '../../../models/Author';
+import { Book } from '../../../models/Book';
 import Breadcrumb from '../../../components/Breadcrumb';
-
 
 const StarRating = ({ averageRating }: { averageRating: number }) => {
     const fullStars = Math.floor(averageRating);
@@ -76,9 +79,12 @@ const AuthorDetailPage: React.FC = () => {
     const { id } = useParams() as { id: string | undefined };
     const [author, setAuthor] = useState<AuthorWithCreations | null>(null);
     const [isEditing, setIsEditing] = useState({ name: false, bio: false });
+    const [editMode, setEditMode] = useState(false); // Ajout d'un mode d'édition
     const [editedFields, setEditedFields] = useState({ name: '', bio: '', photo: '' });
     const [sortType, setSortType] = useState('');
     const [isPhotoModalOpen, setIsPhotoModalOpen] = useState(false);
+    const [selectedBook, setSelectedBook] = useState<Book | null>(null); // Livre sélectionné pour modification/suppression
+    const [modalType, setModalType] = useState<'edit' | 'delete' | null>(null); // Type de modale à afficher
     const textareaRef = useRef<HTMLTextAreaElement>(null);
     const adjustTextareaHeight = useTextareaAutoHeight(textareaRef);
 
@@ -92,6 +98,60 @@ const AuthorDetailPage: React.FC = () => {
                 setIsEditing((prev) => ({ ...prev, [field]: false }));
             } catch (error) {
                 console.error("Erreur lors de la mise à jour de l'auteur :", error);
+            }
+        }
+    };
+
+    const handleModalOpen = (type: 'edit' | 'delete', book?: Book) => {
+        setSelectedBook(book || null);
+        setModalType(type);
+    };
+
+    const handleModalClose = () => {
+        setSelectedBook(null);
+        setModalType(null);
+    };
+
+    const handleUpdateBook = async (updatedBook: Partial<Book>) => {
+        if (selectedBook) {
+            try {
+                const editedBook = await updateBook(selectedBook.id, updatedBook);
+                setAuthor((prev) => {
+                    if (!prev) return prev;
+                    return {
+                        ...prev,
+                        creations: prev.creations.map((creation) => ({
+                            ...creation,
+                            books: creation.books.map((book) =>
+                                book.id === selectedBook.id ? editedBook : book
+                            ),
+                        })),
+                    };
+                });
+                handleModalClose();
+            } catch (error) {
+                console.error("Erreur lors de la mise à jour du livre :", error);
+            }
+        }
+    };
+
+    const handleConfirmDelete = async () => {
+        if (selectedBook) {
+            try {
+                await deleteBook(selectedBook.id);
+                setAuthor((prev) => {
+                    if (!prev) return prev;
+                    return {
+                        ...prev,
+                        creations: prev.creations.map((creation) => ({
+                            ...creation,
+                            books: creation.books.filter((book) => book.id !== selectedBook.id),
+                        })),
+                    };
+                });
+                handleModalClose();
+            } catch (error) {
+                console.error("Erreur lors de la suppression du livre :", error);
             }
         }
     };
@@ -158,6 +218,12 @@ const AuthorDetailPage: React.FC = () => {
             </div>
             <div className="flex justify-between items-center mb-4">
                 <h3 className="text-xl font-semibold text-blue-600">Livres écrits par {author?.name} :</h3>
+                <button 
+                    className={`py-1 px-3 rounded-lg ${editMode ? 'bg-gray-600 text-white' : 'bg-blue-600 text-white'}`} 
+                    onClick={() => setEditMode(!editMode)}
+                >
+                    {editMode ? "Terminer l'édition" : "Mode édition"}
+                </button>
                 <label htmlFor="sortBooks" className="sr-only">Trier les livres</label>
                 <select id="sortBooks" value={sortType} onChange={(e) => setSortType(e.target.value)} className="p-2 border border-gray-300 rounded-lg focus:outline-none">
                     <option value="">Aucun tri</option>
@@ -172,8 +238,8 @@ const AuthorDetailPage: React.FC = () => {
             </div>
             <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                 {sortedBooks.map((book) => (
-                    <Link key={book.id} href={`/books/${book.id}`} passHref>
-                        <div className="border border-gray-200 rounded-lg p-4 shadow hover:shadow-lg transition duration-200 cursor-pointer">
+                    editMode ? (
+                        <div key={book.id} className="border border-gray-200 rounded-lg p-4 shadow hover:shadow-lg transition duration-200">
                             <h4 className="font-bold text-lg text-blue-700">{book.title}</h4>
                             <p className="text-sm text-gray-600">Publié en {book.publicationDate}</p>
                             <p className="mt-2 text-gray-700">{book.summary}</p>
@@ -182,10 +248,54 @@ const AuthorDetailPage: React.FC = () => {
                                 <StarRating averageRating={book.averageRating || 0} />
                                 <span className="ml-2 text-gray-500">{book.averageRating?.toFixed(1) || 'N/A'}</span>
                             </div>
+                            <div className="flex space-x-2 mt-4">
+                                <button onClick={() => handleModalOpen('edit', book)} className="text-blue-600 hover:underline">
+                                    Modifier
+                                </button>
+                                <button onClick={() => handleModalOpen('delete', book)} className="text-red-600 hover:underline">
+                                    Supprimer
+                                </button>
+                            </div>
                         </div>
-                    </Link>
+                    ) : (
+                        <Link key={book.id} href={`/books/${book.id}`} passHref>
+                            <div className="border border-gray-200 rounded-lg p-4 shadow hover:shadow-lg transition duration-200 cursor-pointer">
+                                <h4 className="font-bold text-lg text-blue-700">{book.title}</h4>
+                                <p className="text-sm text-gray-600">Publié en {book.publicationDate}</p>
+                                <p className="mt-2 text-gray-700">{book.summary}</p>
+                                <p className="mt-2 text-gray-500">Prix : {book.price?.toFixed(2) || 'N/A'} €</p>
+                                <div className="flex items-center mt-2">
+                                    <StarRating averageRating={book.averageRating || 0} />
+                                    <span className="ml-2 text-gray-500">{book.averageRating?.toFixed(1) || 'N/A'}</span>
+                                </div>
+                            </div>
+                        </Link>
+                    )
                 ))}
             </div>
+
+            {/* Modale pour modification */}
+            {modalType === 'edit' && selectedBook && (
+                <EditModal<Book>
+                    open={modalType === 'edit'}
+                    onClose={handleModalClose}
+                    entityType="book"
+                    entity={selectedBook}
+                    onUpdateEntity={handleUpdateBook}
+                />
+            )}
+
+            {/* Modale pour suppression */}
+            {modalType === 'delete' && selectedBook && (
+                <DeleteConfirmationModal
+                    open={modalType === 'delete'}
+                    onClose={handleModalClose}
+                    onConfirmDelete={handleConfirmDelete}
+                    itemName={selectedBook.title}
+                    entityType="livre"
+                />
+            )}
+
             {isPhotoModalOpen && (
                 <PhotoUrlModal
                     open={isPhotoModalOpen}

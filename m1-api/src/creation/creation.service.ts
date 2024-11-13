@@ -17,4 +17,8 @@ export class CreationService {
   async createOrGetCreation(nomCreation: string): Promise<Creation> {
     return this.creationRepository.findOrCreate(nomCreation);
   }
+
+  async deleteCreation(id: number): Promise<void> {
+    await this.creationRepository.deleteCreationById(id);
+  }
 }

@@ -1,13 +1,4 @@
-// src/models/Author.ts
-
-export interface Book {
-    id: number;
-    title: string;
-    publicationDate: string;
-    summary: string;
-    price: number;
-    averageRating: number | null;
-}
+import { Book } from './Book'; 
 
 export interface CreationWithBooks {
     id: number;

@@ -6,7 +6,7 @@ export interface Book {
     summary?: string;
     price?: number;
     averageRating: number | null;
-    creation: Creation; // Mise à jour pour inclure l'auteur via la création
+    creation: Creation;
     coverImageUrl?: string;
 }
 

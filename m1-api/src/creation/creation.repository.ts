@@ -1,4 +1,8 @@
-import { Injectable, BadRequestException } from '@nestjs/common';
+import {
+  Injectable,
+  BadRequestException,
+  NotFoundException,
+} from '@nestjs/common';
 import { Repository, DataSource } from 'typeorm';
 import { Creation } from './creation.entity';
 import { Author } from '../author/author.entity';
@@ -25,5 +29,12 @@ export class CreationRepository extends Repository<Creation> {
 
   async findAllCreations(): Promise<Creation[]> {
     return this.find();
+  }
+
+  async deleteCreationById(id: number): Promise<void> {
+    const deleteResult = await this.delete(id);
+    if (!deleteResult.affected) {
+      throw new NotFoundException(`Création avec l'id ${id} non trouvée`);
+    }
   }
 }

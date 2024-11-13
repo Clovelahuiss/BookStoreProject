@@ -20,6 +20,15 @@ export const postCreation = async (nomAuteur: string) => {
     return response.data;
   };
 
+  export const deleteCreation = async (id: number): Promise<void> => {
+    try {
+      await axios.delete(`http://localhost:3001/creations/${id}`);
+    } catch (error) {
+      console.error(`Erreur lors de la suppression de la création ${id}:`, error);
+      throw new Error('Erreur lors de la suppression de la création');
+    }
+  };
+
   export const addCreation = async (creationData: { nomCreation: string }) => {
         try {
             const response = await api.post('/creations', creationData); // Envoie nomCreation

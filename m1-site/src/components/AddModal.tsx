@@ -4,7 +4,7 @@ import { getAvailableCreations, getAllCreations, addCreation } from '../services
 interface AddModalProps {
     open: boolean;
     onClose: () => void;
-    onAddEntity: (entityData: any) => void; // Utilisez un type approprié selon vos besoins
+    onAddEntity: (entityData: any) => void;
     entityType: 'author' | 'book';
 }
 
@@ -23,6 +23,7 @@ const AddModal: React.FC<AddModalProps> = ({ open, onClose, onAddEntity, entityT
 
     const fetchCreations = React.useCallback(async () => {
         try {
+            // Distinction entre les créations disponibles pour auteurs et pour les livres
             const creations = entityType === 'author' ? await getAvailableCreations() : await getAllCreations();
             setAvailableCreations(creations);
         } catch (error) {
@@ -48,16 +49,20 @@ const AddModal: React.FC<AddModalProps> = ({ open, onClose, onAddEntity, entityT
 
     const handleAddEntity = async () => {
         try {
-            let finalCreationId: number | undefined = creationId === 'new' && newCreationName
-                ? (await addCreation({ nomCreation: newCreationName })).id
-                : creationId as number;
+            let finalCreationId: number | undefined = 
+                creationId === 'new' && newCreationName
+                    ? (await addCreation({ nomCreation: newCreationName })).id
+                    : typeof creationId === 'number'
+                    ? creationId
+                    : undefined;
 
+            // Vérifie si finalCreationId est valide
             if (typeof finalCreationId === 'number') {
-                if (entityType === 'author') {
-                    onAddEntity({ name, bio, photo, creationId: finalCreationId });
-                } else if (entityType === 'book') {
-                    onAddEntity({ title, publicationDate, summary, price, coverImageUrl, creationId: finalCreationId });
-                }
+                const entityData = entityType === 'author'
+                    ? { name, bio, photo, creationId: finalCreationId }
+                    : { title, publicationDate, summary, price, coverImageUrl, creationId: finalCreationId };
+
+                onAddEntity(entityData);
                 onClose();
             } else {
                 console.error("Erreur : Aucune création valide n'a été sélectionnée.");
@@ -144,7 +149,7 @@ const AddModal: React.FC<AddModalProps> = ({ open, onClose, onAddEntity, entityT
                     <select
                         id="creation-select"
                         value={creationId}
-                        onChange={(e) => setCreationId(e.target.value as number | 'new')}
+                        onChange={(e) => setCreationId(e.target.value === 'new' ? 'new' : Number(e.target.value))}
                         className="w-full p-2 border rounded"
                     >
                         <option value="" disabled>Choisir une création</option>
