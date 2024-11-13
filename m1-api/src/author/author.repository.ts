@@ -1,6 +1,6 @@
 import { Injectable } from '@nestjs/common';
 import { Repository, DataSource } from 'typeorm';
-import { Author } from '../author/author.entity';
+import { Author } from './author.entity';
 
 @Injectable()
 export class AuthorRepository extends Repository<Author> {
@@ -8,8 +8,17 @@ export class AuthorRepository extends Repository<Author> {
     super(Author, dataSource.createEntityManager());
   }
 
-  async findAuthorsWithCreations(): Promise<Author[]> {
-    // On utilise 'creations' au lieu de 'books' et on récupère indirectement les livres via les créations
-    return this.find({ relations: ['creations'] });
+  async findAuthorsWithDetails(): Promise<Author[]> {
+    return this.createQueryBuilder('author')
+      .leftJoinAndSelect('author.creations', 'creation')
+      .leftJoinAndSelect('creation.books', 'book')
+      .getMany();
+  }
+
+  async findOneWithDetails(id: number): Promise<Author | undefined> {
+    return this.findOne({
+      where: { id },
+      relations: ['creations', 'creations.books'],
+    });
   }
 }

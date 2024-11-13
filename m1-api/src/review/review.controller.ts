@@ -7,6 +7,7 @@ import {
   Body,
   HttpStatus,
   HttpException,
+  Query,
 } from '@nestjs/common';
 import { ReviewService } from '../review/review.service';
 import { CreateReviewDto } from '../review/create-review.dto';
@@ -25,13 +26,9 @@ export class ReviewController {
     }
   }
 
-  @Get(':bookId')
-  async getReviewsByBookId(@Param('bookId') bookId: number): Promise<Review[]> {
-    try {
-      return await this.reviewService.getReviewsByBookId(bookId);
-    } catch (error) {
-      throw new HttpException((error as Error).message, HttpStatus.NOT_FOUND);
-    }
+  @Get()
+  async getReviewsByBookId(@Query('bookId') bookId: number) {
+    return this.reviewService.getReviewsByBookId(bookId);
   }
 
   @Delete(':reviewId')

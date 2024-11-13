@@ -13,59 +13,43 @@ export class BookService {
   ) {}
 
   async createBook(createBookDto: CreateBookDto): Promise<Book> {
-    const { title, publicationDate, summary, price, creationId } =
-      createBookDto;
-
+    const { creationId, ...bookData } = createBookDto;
     const creation = await this.creationRepository.findOne({
       where: { id: creationId },
     });
-    if (!creation) {
+    if (!creation)
       throw new NotFoundException(`Creation with ID ${creationId} not found`);
-    }
 
-    const book = this.bookRepository.create({
-      title,
-      publicationDate,
-      summary,
-      price,
-      creation,
-    });
-
-    return await this.bookRepository.save(book);
+    const book = this.bookRepository.create({ ...bookData, creation });
+    return this.bookRepository.save(book);
   }
 
   async findAllBooks(
     title?: string,
-    sortBy?: string,
+    sortBy = 'averageRating',
     sortOrder: 'ASC' | 'DESC' = 'ASC',
   ): Promise<Book[]> {
     const query = this.bookRepository
       .createQueryBuilder('book')
-      .leftJoinAndSelect('book.creation', 'creation');
+      .leftJoinAndSelect('book.creation', 'creation')
+      .leftJoinAndSelect('creation.author', 'author');
 
-    if (title) {
-      query.where('book.title LIKE :title', { title: `%${title}%` });
-    }
+    if (title) query.where('book.title LIKE :title', { title: `%${title}%` });
+    query.orderBy(`book.${sortBy}`, sortOrder);
 
-    if (sortBy) {
-      query.orderBy(`book.${sortBy}`, sortOrder);
-    }
-
-    return await query.getMany();
+    return query.getMany();
   }
 
   async findOneBook(id: number): Promise<Book> {
-    const book = await this.bookRepository.findOne({
-      where: { id },
-      relations: ['creation', 'reviews'],
-    });
+    const book = await this.bookRepository.findBookById(id);
     if (!book) throw new NotFoundException(`Book with ID ${id} not found`);
     return book;
   }
 
   async updateBook(id: number, updateBookDto: UpdateBookDto): Promise<Book> {
-    await this.bookRepository.update(id, updateBookDto);
-    return this.findOneBook(id);
+    const book = await this.findOneBook(id);
+    Object.assign(book, updateBookDto);
+    return this.bookRepository.save(book);
   }
 
   async deleteBook(id: number): Promise<void> {

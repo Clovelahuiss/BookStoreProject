@@ -1,35 +1,23 @@
+
 export interface Book {
     id: number;
     title: string;
     publicationDate: string;
-    summary: string;
-    price: number;
+    summary?: string;
+    price?: number;
     averageRating: number | null;
+    creation: Creation; // Mise à jour pour inclure l'auteur via la création
+    coverImageUrl?: string;
 }
 
-export interface CreationWithBooks {
+
+export interface Author {
     id: number;
-    nomCreation: string;
-    books: Book[]; // Liste des livres associés à la création
+    name: string;
 }
 
-export type NewBook = Omit<Book, 'id'>;
-
-// Example usage of CreationWithBooks
-const exampleCreation: CreationWithBooks = {
-    id: 1,
-    nomCreation: "Example Creation",
-    books: [
-        {
-            id: 1,
-            title: "Example Book",
-            publicationDate: "2023-01-01",
-            summary: "This is an example book.",
-            price: 19.99,
-            averageRating: 4.5
-        }
-    ]
-};
-
-// Log the example creation to the console
-console.log(exampleCreation);
+export interface Creation {
+    id: number;
+    author: Author;
+    nomCreation: string;
+}

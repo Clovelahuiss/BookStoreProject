@@ -1,6 +1,6 @@
 import { Injectable, BadRequestException } from '@nestjs/common';
 import { Repository, DataSource } from 'typeorm';
-import { Creation } from '../creation/creation.entity';
+import { Creation } from './creation.entity';
 import { Author } from '../author/author.entity';
 
 @Injectable()
@@ -17,21 +17,13 @@ export class CreationRepository extends Repository<Creation> {
   }
 
   async findOrCreate(nomCreation: string, author?: Author): Promise<Creation> {
-    // Vérifiez si nomCreation est défini
-    if (!nomCreation) {
-      throw new BadRequestException(
-        "Le champ 'nomCreation' est requis pour créer une création.",
-      );
-    }
-
+    if (!nomCreation) throw new BadRequestException('Nom de création requis');
     let creation = await this.findOne({ where: { nomCreation } });
+    if (!creation) creation = this.create({ nomCreation, author });
+    return this.save(creation);
+  }
 
-    // Si la création n'existe pas, créez-la
-    if (!creation) {
-      creation = this.create({ nomCreation, author });
-      await this.save(creation);
-    }
-
-    return creation;
+  async findAllCreations(): Promise<Creation[]> {
+    return this.find();
   }
 }

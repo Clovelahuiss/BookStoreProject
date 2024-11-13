@@ -1,7 +1,4 @@
-// src/components/BookCard.tsx
-
 import React from 'react';
-import { Card, CardContent, Typography, CardActions, Button, Avatar, Box } from '@mui/material';
 import Link from 'next/link';
 import { Book } from '../models/Book';
 
@@ -13,58 +10,50 @@ interface BookCardProps {
 }
 
 const BookCard: React.FC<BookCardProps> = ({ book, editMode, onEdit, onDelete }) => {
+    const handleClick = (event: React.MouseEvent) => {
+        if (editMode) {
+            event.preventDefault(); // Empêche la navigation en mode édition
+        }
+    };
+
     return (
-        <Link href={`/books/${book.id}`} passHref style={{ textDecoration: 'none', color: 'inherit' }}>
-            <Card
-                variant="outlined"
-                sx={{
-                    width: '100%',
-                    maxWidth: '100%', // Assure que chaque carte prend toute la place disponible
-                    cursor: 'pointer',
-                    transition: 'transform 0.2s ease-in-out',
-                    '&:hover': {
-                        transform: 'scale(1.05)',
-                        boxShadow: 3,
-                    },
-                    textDecoration: 'none',
-                }}
-            >
-                <CardContent>
-                    <Box display="flex" justifyContent="center" mb={2}>
-                        <Avatar src={book.creation?.author?.photo || ''} sx={{ width: 100, height: 100 }} />
-                    </Box>
-                    <Typography variant="h6" component="div" align="center" color="textPrimary">
-                        {book.title}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary" align="center">
-                        Création : {book.creation.nomCreation}
-                    </Typography>
-                    <Typography variant="body2" color="text.secondary" align="center">
-                        Note moyenne : {book.averageRating ? book.averageRating.toFixed(1) : 'N/A'}
-                    </Typography>
-                </CardContent>
-                {editMode && (
-                    <CardActions>
-                        <Button
-                            variant="outlined"
-                            color="primary"
-                            onClick={(e) => { e.preventDefault(); onEdit(); }}
-                            fullWidth
-                        >
-                            Modifier
-                        </Button>
-                        <Button
-                            variant="outlined"
-                            color="error"
-                            onClick={(e) => { e.preventDefault(); onDelete(); }}
-                            fullWidth
-                        >
-                            Supprimer
-                        </Button>
-                    </CardActions>
-                )}
-            </Card>
-        </Link>
+        <div onClick={handleClick} className="border rounded-lg shadow p-4 cursor-pointer hover:shadow-lg transition duration-200">
+            {!editMode ? (
+                <Link href={`/books/${book.id}`} passHref>
+                    <div className="block">
+                        <div className="h-48 w-full overflow-hidden rounded-md">
+                            <img
+                                src={book.coverImageUrl || '/default-cover.jpg'}
+                                alt={book.title}
+                                className="object-cover w-full h-full"
+                            />
+                        </div>
+                        <h2 className="font-bold mt-2 text-lg">{book.title}</h2>
+                    </div>
+                </Link>
+            ) : (
+                <>
+                    <div className="h-48 w-full overflow-hidden rounded-md">
+                        <img
+                            src={book.coverImageUrl || '/default-cover.jpg'}
+                            alt={book.title}
+                            className="object-cover w-full h-full"
+                        />
+                    </div>
+                    <h2 className="font-bold mt-2 text-lg">{book.title}</h2>
+                </>
+            )}
+            <p className="text-sm text-gray-600">Auteur : {book.creation?.author?.name || "Inconnu"}</p>
+            <p className="text-gray-600 mt-1">Prix : {book.price?.toFixed(2) || 'N/A'} €</p>
+            <p className="text-gray-600 mt-1">Note moyenne : {book.averageRating?.toFixed(1) || 'N/A'}</p>
+
+            {editMode && (
+                <div className="flex justify-between mt-2">
+                    <button className="text-blue-600 hover:underline" onClick={(e) => { e.stopPropagation(); onEdit(); }}>Modifier</button>
+                    <button className="text-red-600 hover:underline" onClick={(e) => { e.stopPropagation(); onDelete(); }}>Supprimer</button>
+                </div>
+            )}
+        </div>
     );
 };
 

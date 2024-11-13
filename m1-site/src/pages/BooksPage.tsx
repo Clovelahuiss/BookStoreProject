@@ -1,4 +1,5 @@
 // src/pages/BooksPage.tsx
+
 'use client';
 import React, { useState, useEffect } from 'react';
 import AddBookModal from '../components/AddBookModal';
@@ -10,6 +11,8 @@ import { getBooks, createBook, updateBook, deleteBook } from '../services/bookSe
 
 const BooksPage: React.FC = () => {
     const [books, setBooks] = useState<Book[]>([]);
+    const [sortCriteria, setSortCriteria] = useState<'note' | 'author' | 'title' | 'price' | 'date'>('note');
+    const [sortOrder, setSortOrder] = useState<string>('desc');
     const [openAddModal, setOpenAddModal] = useState(false);
     const [openEditModal, setOpenEditModal] = useState(false);
     const [openDeleteModal, setOpenDeleteModal] = useState(false);
@@ -36,9 +39,27 @@ const BooksPage: React.FC = () => {
         }
     }, [openAddModal, openEditModal, openDeleteModal]);
 
-    const filteredBooks = books.filter(book =>
-        book.title.toLowerCase().includes(searchTerm.toLowerCase())
-    );
+    const handleSortChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        setSortCriteria(e.target.value as 'note' | 'author' | 'title' | 'price' | 'date');
+    };
+
+    const handleOrderChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+        setSortOrder(e.target.value);
+    };
+
+    const sortedBooks = [...books]
+        .filter((book) => book.title.toLowerCase().includes(searchTerm.toLowerCase()))
+        .sort((a, b) => {
+            const criteria = {
+                note: (a.averageRating ?? 0) - (b.averageRating ?? 0),
+                author: a.creation?.author?.name.localeCompare(b.creation?.author?.name || ''),
+                title: a.title.localeCompare(b.title),
+                price: (a.price ?? 0) - (b.price ?? 0),
+                date: new Date(a.publicationDate).getTime() - new Date(b.publicationDate).getTime(),
+            };
+            let result = criteria[sortCriteria as keyof typeof criteria];
+            return sortOrder === 'asc' ? result : -result;
+        });
 
     const handleOpenAddModal = () => setOpenAddModal(true);
 
@@ -48,11 +69,12 @@ const BooksPage: React.FC = () => {
         publicationDate: string;
         summary?: string;
         price?: number;
+        coverImageUrl?: string;
     }) => {
         try {
             const addedBook = await createBook({
                 ...newBook,
-                averageRating: 0,
+                creationId: newBook.creationId,
             });
             setBooks((prev) => [...prev, addedBook]);
             setOpenAddModal(false);
@@ -143,6 +165,37 @@ const BooksPage: React.FC = () => {
                 />
             </div>
 
+            <div className="flex gap-4 mb-6">
+                <div>
+                    <label htmlFor="sortCriteria" className="block text-gray-700">Trier par :</label>
+                    <select
+                        id="sortCriteria"
+                        value={sortCriteria}
+                        onChange={handleSortChange}
+                        className="p-2 border rounded"
+                    >
+                        <option value="note">Note</option>
+                        <option value="author">Auteur</option>
+                        <option value="title">Nom</option>
+                        <option value="price">Prix</option>
+                        <option value="date">Date de publication</option>
+                    </select>
+                </div>
+
+                <div>
+                    <label htmlFor="sortOrder" className="block text-gray-700">Ordre :</label>
+                    <select
+                        id="sortOrder"
+                        value={sortOrder}
+                        onChange={handleOrderChange}
+                        className="p-2 border rounded"
+                    >
+                        <option value="asc">Croissant</option>
+                        <option value="desc">Décroissant</option>
+                    </select>
+                </div>
+            </div>
+
             <AddBookModal 
                 open={openAddModal} 
                 onClose={() => setOpenAddModal(false)} 
@@ -166,7 +219,7 @@ const BooksPage: React.FC = () => {
             )}
             
             <div className="grid grid-cols-1 gap-4 mt-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-                {filteredBooks.map((book) => (
+                {sortedBooks.map((book) => (
                     <BookCard
                         key={book.id}
                         book={book}

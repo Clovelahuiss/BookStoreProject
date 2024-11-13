@@ -16,6 +16,9 @@ export class Book {
   @Column()
   title: string;
 
+  @Column({ nullable: true })
+  coverImageUrl?: string;
+
   @Column()
   publicationDate: string;
 

@@ -7,7 +7,12 @@ import { getAvailableCreations, addCreation } from '../services/creationService'
 interface AddAuthorModalProps {
     open: boolean;
     onClose: () => void;
-    onAddAuthor: (authorData: { name: string; bio: string; photo: string; creationId?: number; newCreationName?: string }) => void;
+    onAddAuthor: (authorData: {
+        name: string;
+        bio: string;
+        photo: string;
+        creationId?: number;
+    }) => void;
 }
 
 const AddAuthorModal: React.FC<AddAuthorModalProps> = ({ open, onClose, onAddAuthor }) => {
@@ -38,10 +43,28 @@ const AddAuthorModal: React.FC<AddAuthorModalProps> = ({ open, onClose, onAddAut
         }
     }, [open]);
 
-    const handleAdd = () => {
-        onAddAuthor({ name, bio, photo, creationId: creationId === 'new' ? undefined : creationId, newCreationName });
-        fetchAvailableCreations(); // Rafraîchit la liste des créations après ajout d'un auteur
-        onClose();
+    const handleAddAuthor = async () => {
+        try {
+            let finalCreationId: number | undefined = 
+                creationId === 'new' && newCreationName 
+                    ? (await addCreation({ nomCreation: newCreationName })).id 
+                    : creationId as number;
+
+            // Validation pour s'assurer que `finalCreationId` est bien un `number`
+            if (typeof finalCreationId === 'number') {
+                onAddAuthor({ 
+                    name, 
+                    bio, 
+                    photo, 
+                    creationId: finalCreationId 
+                });
+                onClose();
+            } else {
+                console.error("Erreur : Aucune création valide n'a été sélectionnée.");
+            }
+        } catch (error) {
+            console.error("Erreur lors de l'ajout de l'auteur :", error);
+        }
     };
 
     return (
@@ -99,7 +122,7 @@ const AddAuthorModal: React.FC<AddAuthorModalProps> = ({ open, onClose, onAddAut
             </DialogContent>
             <DialogActions>
                 <Button onClick={onClose} color="secondary">Annuler</Button>
-                <Button onClick={handleAdd} color="primary" variant="contained">Valider</Button>
+                <Button onClick={handleAddAuthor} color="primary" variant="contained">Valider</Button>
             </DialogActions>
         </Dialog>
     );

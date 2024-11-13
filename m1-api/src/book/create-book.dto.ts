@@ -1,22 +1,24 @@
-import { IsNotEmpty, IsOptional, IsDecimal, IsString } from 'class-validator';
+import { IsString, IsOptional, IsNumber, IsDateString } from 'class-validator';
 
 export class CreateBookDto {
-  @IsNotEmpty()
   @IsString()
   title: string;
 
-  @IsNotEmpty()
-  @IsString()
+  @IsDateString()
   publicationDate: string;
 
-  @IsOptional()
   @IsString()
+  @IsOptional()
   summary?: string;
 
+  @IsNumber()
   @IsOptional()
-  @IsDecimal()
   price?: number;
 
-  @IsNotEmpty()
+  @IsString()
+  @IsOptional()
+  coverImageUrl?: string;
+
+  @IsNumber()
   creationId: number;
 }

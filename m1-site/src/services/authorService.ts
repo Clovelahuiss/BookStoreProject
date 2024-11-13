@@ -40,6 +40,14 @@ export const addAuthor = async (author: NewAuthor): Promise<Author> => {
     return response.data;
 };
 
+export const getAuthorByCreationId = async (creationId: number): Promise<Author> => {
+    const response = await fetch(`/api/authors/by-creation/${creationId}`);
+    if (!response.ok) {
+        throw new Error(`Erreur lors de la récupération de l'auteur avec l'ID de la création ${creationId}`);
+    }
+    return response.json();
+};
+
 export const getAuthorsWithPagination = async (limit: number, offset: number) => {
     const response = await axios.get(`/api/authors?limit=${limit}&offset=${offset}`);
     return response.data;

@@ -34,3 +34,8 @@ export const postCreation = async (nomAuteur: string) => {
     const response = await axios.get('http://localhost:3001/creations/available');
     return response.data;
   };
+
+  export const getAllCreations = async (): Promise<Creation[]> => {
+    const response = await axios.get('http://localhost:3001/creations');
+    return response.data;
+  };

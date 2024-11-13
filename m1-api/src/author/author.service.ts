@@ -4,93 +4,59 @@ import { AuthorRepository } from './author.repository';
 import { CreateAuthorDto } from './create-author.dto';
 import { UpdateAuthorDto } from './update-author.dto';
 import { CreationRepository } from '../creation/creation.repository';
-import { BookRepository } from '../book/book.repository';
 
 @Injectable()
 export class AuthorService {
   constructor(
     private authorRepository: AuthorRepository,
     private creationRepository: CreationRepository,
-    private bookRepository: BookRepository,
   ) {}
 
   async findAllAuthors(search?: string) {
+    // Construire la requête de base pour récupérer les auteurs avec leurs créations et livres associés
     const authorsQuery = this.authorRepository
       .createQueryBuilder('author')
       .leftJoinAndSelect('author.creations', 'creation')
       .leftJoinAndSelect('creation.books', 'book');
 
+    // Appliquer le filtre si 'search' est défini
     if (search) {
       authorsQuery.where('author.name LIKE :search', { search: `%${search}%` });
     }
 
     const authors = await authorsQuery.getMany();
 
+    // Calculer le nombre de livres et la note moyenne pour chaque auteur
     return authors.map((author) => {
       const books = author.creations.flatMap(
         (creation) => creation.books || [],
       );
-      const totalRatings = books.reduce(
-        (sum, book) => sum + (book.averageRating || 0),
-        0,
-      );
-      const averageRating = books.length ? totalRatings / books.length : null;
-
-      return {
-        id: author.id,
-        name: author.name,
-        photo: author.photo,
-        bio: author.bio,
-        bookCount: books.length,
-        idCreations: author.creations.map((creation) => creation.id) || [],
-        averageRating: averageRating, // Ajoute la moyenne des notes ici
-      };
+      const averageRating = books.length
+        ? books.reduce((sum, book) => sum + (book.averageRating || 0), 0) /
+          books.length
+        : null;
+      return { ...author, bookCount: books.length, averageRating };
     });
   }
 
   async createAuthor(createAuthorDto: CreateAuthorDto): Promise<Author> {
-    const { name, bio, photo, creationId } = createAuthorDto;
+    const { creationId, ...authorData } = createAuthorDto;
+    const author = this.authorRepository.create(authorData);
 
-    const author = this.authorRepository.create({
-      name,
-      bio,
-      photo,
-    });
-
-    // Si un creationId est fourni, on lie l'auteur à cette création
     if (creationId) {
       const creation = await this.creationRepository.findOne({
         where: { id: creationId },
       });
-      if (creation) {
-        author.creations = [creation]; // Attribue la création à l'auteur
-      }
+      if (creation) author.creations = [creation];
     }
 
     return this.authorRepository.save(author);
   }
 
   async findAuthorById(id: number): Promise<Author> {
-    const author = await this.authorRepository
-      .createQueryBuilder('author')
-      .leftJoinAndSelect('author.creations', 'creation')
-      .leftJoinAndSelect('creation.books', 'book') // Jointure pour récupérer les livres de chaque création
-      .where('author.id = :id', { id })
-      .getOne();
-
-    if (!author) {
-      throw new NotFoundException(`Author with ID ${id} not found`);
-    }
-
+    const author = await this.authorRepository.findOneWithDetails(id);
+    if (!author) throw new NotFoundException(`Author with ID ${id} not found`);
     return author;
-  }
-
-  async findAllWithPagination(limit: number, offset: number) {
-    const [authors, total] = await this.authorRepository.findAndCount({
-      skip: offset,
-      take: limit,
-    });
-    return { authors, total };
   }
 
   async updateAuthor(

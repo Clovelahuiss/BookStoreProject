@@ -8,7 +8,18 @@ export class BookRepository extends Repository<Book> {
     super(Book, dataSource.createEntityManager());
   }
 
+  // Récupérer tous les livres avec les auteurs associés via la création
   async findAllBooksWithAuthors(): Promise<Book[]> {
-    return this.find({ relations: ['author'] });
+    return this.createQueryBuilder('book')
+      .leftJoinAndSelect('book.creation', 'creation')
+      .leftJoinAndSelect('creation.author', 'author')
+      .getMany();
+  }
+
+  async findBookById(id: number): Promise<Book | undefined> {
+    return this.findOne({
+      where: { id },
+      relations: ['creation', 'creation.author', 'reviews'],
+    });
   }
 }
